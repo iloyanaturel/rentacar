@@ -4,36 +4,32 @@ Profesyonel, mobil öncelikli **araç kiralama yönetim sistemi** (işletme oper
 
 ## Durum
 
-**STEP 2 tamamlandı:** Supabase/Postgres şema, RLS, RPC’ler, storage bucket’ları, seed ve DB testleri.
+**STEP 3 tamamlandı:** Expo mobil iskelet, Authentication, bottom navigation, gerçek Dashboard.
 
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — monorepo ve mimari
-- [docs/DEVELOPMENT_PLAN.md](./docs/DEVELOPMENT_PLAN.md) — STEP sırası
-- [docs/DATABASE.md](./docs/DATABASE.md) — migration / seed / test kullanımı
+Belgeler:
 
-## Hedef stack (özet)
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- [docs/DATABASE.md](./docs/DATABASE.md)
+- [docs/DEVELOPMENT_PLAN.md](./docs/DEVELOPMENT_PLAN.md)
+- [docs/STEP3_TESTING.md](./docs/STEP3_TESTING.md)
 
-| Alan | Teknoloji |
-| --- | --- |
-| Mobil | Expo, Expo Router, TypeScript, NativeWind, TanStack Query, RHF + Zod |
-| Backend | Supabase (Postgres, Auth, Storage, RLS) |
-| Web | Next.js + Tailwind (MVP sonrası) |
-| Ortak | `@rentaflow/shared` tipleri, date-fns, `₺` formatı |
-
-## MVP kapsamı
-
-Auth → Dashboard → Araçlar → Müşteriler → Kiralamalar → Ödemeler → Teslim/iade → Temel raporlar
-
-## Database komutları
+## Uygulamayı çalıştırma
 
 ```bash
-npm run db:test          # lokal Postgres üzerinde migration + STEP 2 testleri
-npx supabase db reset    # Docker ile local Supabase (migrations + seed)
+cp apps/mobile/.env.example apps/mobile/.env
+# EXPO_PUBLIC_SUPABASE_URL + EXPO_PUBLIC_SUPABASE_ANON_KEY doldurun
+# supabase db push ile migration’ları uygulayın
+
+cd apps/mobile && npx expo start
+```
+
+## Kontroller
+
+```bash
+npm run test:step3    # shared + mobile typecheck + unit tests
+npm run db:test       # Postgres migration + RLS/RPC tests
 ```
 
 ## Sonraki adım
 
-**STEP 3:** Expo mobil iskelet + Authentication (login / session / guard).
-
-## Ortam değişkenleri
-
-`.env.example` dosyasını kopyalayın. Service role key client’a konmaz.
+**STEP 4:** Araç modülü (liste, arama/filtre, ekleme, detay).

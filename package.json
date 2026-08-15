@@ -9,7 +9,10 @@
   ],
   "scripts": {
     "db:test": "bash scripts/run-db-tests.sh",
-    "typecheck:shared": "npm run typecheck -w @rentaflow/shared"
+    "typecheck:shared": "npm run typecheck -w @rentaflow/shared",
+    "typecheck:mobile": "npm run typecheck -w mobile",
+    "test:mobile": "npm run test:unit -w mobile",
+    "test:step3": "npm run typecheck:shared && npm run typecheck:mobile && npm run test:mobile"
   },
   "engines": {
     "node": ">=20"

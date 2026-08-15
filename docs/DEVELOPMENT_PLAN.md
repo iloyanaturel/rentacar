@@ -34,32 +34,26 @@ Her adımda: kod → TypeScript → lint/build → schema-model uyumu → UX.
 
 ---
 
-## STEP 3 — Proje kurulumu + Authentication
+## STEP 3 — Proje kurulumu + Authentication ✅
 
-**Hedef:**
-- Monorepo root + `apps/mobile` (Expo Router, NativeWind, TanStack Query, RHF, Zod)
-- `packages/shared` (types, currency/date utils, Zod ortak şemalar)
-- Supabase client + SecureStore session
-- Login / şifremi unuttum / çıkış
-- Auth guard (login olmadan tabs yok)
-- Ortak UI: Button, Input, Card, Badge, EmptyState, LoadingState, ErrorState
-- `.env.example`, `.gitignore`
+**Durum:** Tamamlandı
 
-**Doğrulama:** `tsc --noEmit`, Expo typecheck; auth flow smoke (env varsa).
+**Çıktılar:**
+- `apps/mobile` Expo Router uygulaması (Auth, Tabs, Dashboard)
+- `AuthProvider` + SecureStore session + route guards
+- Login / Şifremi unuttum (RHF + Zod, TR mesajlar)
+- Dashboard gerçek RPC verileri (`get_dashboard_summary`, `get_today_returns`, `get_upcoming_rentals`)
+- Design tokens + reusable UI components
+- Daha Fazla menü placeholder’ları + Profil + Logout
+- `docs/STEP3_TESTING.md`
+
+**Doğrulama:** `npm run test:step3` ✅ · `npm run db:test` ✅ · Expo config OK
 
 ---
 
-## STEP 4 — Dashboard
+## STEP 4 — Dashboard (taşındı / birleşti)
 
-**Hedef:**
-- KPI: toplam / müsait / kirada / bakımda
-- Finansal kartlar: bugünkü ciro, ay ciro, tahsil, bekleyen
-- Operasyon: bugün/yarın teslim, yaklaşan
-- Listeler: bugünkü teslimler, yaklaşan 7 gün
-- Araç durumu grafiği
-- `dashboardService` — aggregation mümkün olduğunca SQL/view veya RPC
-
-**Doğrulama:** Boş org empty state; seed ile dolu state.
+Dashboard STEP 3 ile tamamlandı. Sonraki adım araç modülü.
 
 ---
 

@@ -641,6 +641,48 @@ export interface Database {
         Args: Record<string, never>;
         Returns: UserRole;
       };
+      get_dashboard_summary: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      get_today_returns: {
+        Args: Record<string, never>;
+        Returns: {
+          rental_id: string;
+          vehicle_id: string;
+          plate: string;
+          brand: string;
+          model: string;
+          customer_id: string;
+          customer_name: string;
+          end_date: string;
+          end_time: string;
+          total_amount: number;
+          paid_amount: number;
+          remaining_amount: number;
+          status: RentalStatus;
+          payment_status: PaymentStatus;
+        }[];
+      };
+      get_upcoming_rentals: {
+        Args: {
+          p_days?: number;
+        };
+        Returns: {
+          rental_id: string;
+          vehicle_id: string;
+          plate: string;
+          brand: string;
+          model: string;
+          customer_id: string;
+          customer_name: string;
+          start_date: string;
+          start_time: string;
+          end_date: string;
+          total_amount: number;
+          status: RentalStatus;
+        }[];
+      };
     };
     Enums: {
       user_role: UserRole;
