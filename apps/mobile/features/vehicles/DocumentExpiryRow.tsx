@@ -17,11 +17,13 @@ export function DocumentExpiryRow({ label, date }: Props) {
         : colors.textSecondary;
 
   const icon =
-    status.level === 'expired' || status.level === 'critical'
-      ? '🔴'
-      : status.level === 'warning'
-        ? '🟠'
-        : '';
+    status.level === 'expired'
+      ? '⛔'
+      : status.level === 'critical'
+        ? '🔴'
+        : status.level === 'warning'
+          ? '🟡'
+          : '';
 
   return (
     <View style={styles.row}>

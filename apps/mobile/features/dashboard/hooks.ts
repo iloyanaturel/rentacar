@@ -10,6 +10,7 @@ export const dashboardKeys = {
   outstanding: () => [...dashboardKeys.all, 'outstanding'] as const,
   overdue: () => [...dashboardKeys.all, 'overdue'] as const,
   upcoming: () => [...dashboardKeys.all, 'upcoming'] as const,
+  opsToday: () => [...dashboardKeys.all, 'ops-today'] as const,
 };
 
 export function useDashboardStats() {
@@ -62,6 +63,15 @@ export function useUpcomingRentals() {
   return useQuery({
     queryKey: dashboardKeys.upcoming(),
     queryFn: () => dashboardService.getUpcomingRentals(7),
+    enabled: status === 'authenticated',
+  });
+}
+
+export function useOpsTodaySummary() {
+  const { status } = useAuth();
+  return useQuery({
+    queryKey: dashboardKeys.opsToday(),
+    queryFn: () => dashboardService.getOpsTodaySummary(),
     enabled: status === 'authenticated',
   });
 }

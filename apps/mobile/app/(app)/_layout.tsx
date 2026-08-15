@@ -48,6 +48,15 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="calendar"
+        options={{
+          title: 'Takvim',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="vehicles"
         options={{
           title: 'Araçlar',
@@ -62,7 +71,7 @@ export default function AppLayout() {
         options={{
           title: 'Kiralamalar',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" color={color} size={size} />
+            <Ionicons name="key-outline" color={color} size={size} />
           ),
         }}
       />

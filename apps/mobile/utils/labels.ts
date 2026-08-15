@@ -64,3 +64,92 @@ export function roleLabel(role: 'admin' | 'staff' | 'viewer'): string {
       return 'İzleyici';
   }
 }
+
+export function maintenanceTypeLabel(
+  t:
+    | 'PERIODIC'
+    | 'OIL_CHANGE'
+    | 'TIRES'
+    | 'BRAKES'
+    | 'BATTERY'
+    | 'INSPECTION'
+    | 'OTHER'
+    | string,
+): string {
+  switch (t) {
+    case 'PERIODIC':
+      return 'Periyodik bakım';
+    case 'OIL_CHANGE':
+      return 'Yağ değişimi';
+    case 'TIRES':
+      return 'Lastik';
+    case 'BRAKES':
+      return 'Fren';
+    case 'BATTERY':
+      return 'Akü';
+    case 'INSPECTION':
+      return 'Muayene';
+    case 'OTHER':
+      return 'Diğer';
+    default:
+      return t;
+  }
+}
+
+export function maintenanceStatusLabel(
+  s: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED',
+): string {
+  switch (s) {
+    case 'SCHEDULED':
+      return 'Planlandı';
+    case 'IN_PROGRESS':
+      return 'Devam ediyor';
+    case 'COMPLETED':
+      return 'Tamamlandı';
+    case 'CANCELLED':
+      return 'İptal';
+  }
+}
+
+export function expenseCategoryLabel(
+  c:
+    | 'MAINTENANCE'
+    | 'FUEL'
+    | 'INSURANCE'
+    | 'CASCO'
+    | 'TAX'
+    | 'TIRES'
+    | 'REPAIR'
+    | 'CLEANING'
+    | 'TOLL'
+    | 'PARKING'
+    | 'OTHER'
+    | string,
+): string {
+  switch (c) {
+    case 'MAINTENANCE':
+      return 'Bakım';
+    case 'FUEL':
+      return 'Yakıt';
+    case 'INSURANCE':
+      return 'Sigorta';
+    case 'CASCO':
+      return 'Kasko';
+    case 'TAX':
+      return 'Vergi';
+    case 'TIRES':
+      return 'Lastik';
+    case 'REPAIR':
+      return 'Onarım';
+    case 'CLEANING':
+      return 'Temizlik';
+    case 'TOLL':
+      return 'HGS/OGS';
+    case 'PARKING':
+      return 'Otopark';
+    case 'OTHER':
+      return 'Diğer';
+    default:
+      return c;
+  }
+}

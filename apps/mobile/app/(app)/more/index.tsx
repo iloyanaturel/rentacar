@@ -2,12 +2,14 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Avatar, Card, ListItem, ScreenHeader } from '@/components/ui';
 import { useAuth } from '@/features/auth';
+import { useUnreadNotificationCount } from '@/features/ops/hooks';
 import { getErrorMessage } from '@/utils/errors';
 import { colors, spacing } from '@/theme';
 
 export default function MoreScreen() {
   const router = useRouter();
   const { profile, organization, signOut } = useAuth();
+  const unread = useUnreadNotificationCount();
 
   const confirmLogout = () => {
     Alert.alert('Çıkış Yap', 'Çıkış yapmak istediğinize emin misiniz?', [
@@ -28,11 +30,10 @@ export default function MoreScreen() {
     ]);
   };
 
+  const unreadCount = unread.data ?? 0;
+
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-    >
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.profileRow}>
         <Avatar name={profile?.full_name} size={56} />
         <View style={styles.profileText}>
@@ -50,7 +51,9 @@ export default function MoreScreen() {
         <ListItem title="Bakım" onPress={() => router.push('/(app)/more/maintenance')} />
         <ListItem title="Raporlar" onPress={() => router.push('/(app)/more/reports')} />
         <ListItem
-          title="Bildirimler"
+          title={
+            unreadCount > 0 ? `Bildirimler (${unreadCount})` : 'Bildirimler'
+          }
           onPress={() => router.push('/(app)/more/notifications')}
         />
         <ListItem title="Ayarlar" onPress={() => router.push('/(app)/more/settings')} />

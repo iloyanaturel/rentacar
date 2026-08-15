@@ -24,6 +24,7 @@ export type {
   PaymentStatus,
   ExpenseCategory,
   MaintenanceType,
+  MaintenanceStatus,
   RentalPhotoType,
   FuelType,
   TransmissionType,

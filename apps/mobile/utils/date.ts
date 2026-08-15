@@ -49,3 +49,8 @@ export function formatFriendlyDate(
 export function getTodayInIstanbul(): Date {
   return toZonedTime(new Date(), APP_TIMEZONE);
 }
+
+/** YYYY-MM-DD in Europe/Istanbul */
+export function getTodayIsoInIstanbul(): string {
+  return formatInTimeZone(new Date(), APP_TIMEZONE, 'yyyy-MM-dd');
+}

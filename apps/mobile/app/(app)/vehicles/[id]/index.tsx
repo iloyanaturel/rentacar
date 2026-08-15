@@ -41,10 +41,16 @@ import {
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/date';
 import { getErrorMessage } from '@/utils/errors';
-import { vehicleStatusLabel } from '@/utils/labels';
+import {
+  expenseCategoryLabel,
+  maintenanceStatusLabel,
+  maintenanceTypeLabel,
+  vehicleStatusLabel,
+} from '@/utils/labels';
 import { fuelLabel, transmissionLabel } from '@/utils/plate';
 import type { VehicleStatus } from '@rentaflow/shared';
 import { colors, spacing, typography } from '@/theme';
+import { useVehicleExpenseSummary } from '@/features/ops/hooks';
 
 type TabKey = 'general' | 'rentals' | 'maintenance' | 'expenses' | 'documents';
 
@@ -70,6 +76,7 @@ export default function VehicleDetailScreen() {
   const rentalsQuery = useVehicleRentals(id);
   const maintenanceQuery = useVehicleMaintenance(id);
   const expensesQuery = useVehicleExpenses(id);
+  const expenseSummaryQuery = useVehicleExpenseSummary(id);
 
   const uploadPhoto = useUploadVehiclePhoto(id);
   const deletePhoto = useDeleteVehiclePhoto(id);
@@ -335,15 +342,33 @@ export default function VehicleDetailScreen() {
 
       {tab === 'maintenance' ? (
         <View style={styles.block}>
+          <Button
+            title="+ Bakım Ekle"
+            onPress={() => router.push('/(app)/more/maintenance')}
+            style={{ marginBottom: 12 }}
+          />
           {(maintenanceQuery.data ?? []).length === 0 ? (
             <EmptyState title="Bakım kaydı yok." />
           ) : (
             (maintenanceQuery.data ?? []).map((item) => (
               <Card key={item.id} style={styles.historyCard}>
-                <Text style={styles.historyTitle}>{item.maintenance_type}</Text>
+                <Text style={styles.historyTitle}>
+                  {maintenanceTypeLabel(item.maintenance_type)}
+                </Text>
                 <Text style={styles.historyMeta}>
-                  {formatDate(item.maintenance_date)} ·{' '}
+                  {formatDate(
+                    (item as { scheduled_date?: string }).scheduled_date ??
+                      item.maintenance_date,
+                  )}
+                  {item.current_km != null
+                    ? ` · ${item.current_km.toLocaleString('tr-TR')} km`
+                    : ''}
+                </Text>
+                <Text style={styles.historyMeta}>
                   {formatCurrency(item.amount)}
+                  {(item as { status?: string }).status
+                    ? ` · ${maintenanceStatusLabel((item as { status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' }).status)}`
+                    : ''}
                 </Text>
                 {item.description ? (
                   <Text style={styles.historyMeta}>{item.description}</Text>
@@ -356,15 +381,41 @@ export default function VehicleDetailScreen() {
 
       {tab === 'expenses' ? (
         <View style={styles.block}>
+          <View style={styles.kpiRow}>
+            <StatCard
+              label="Bu Ay"
+              value={formatCurrency(expenseSummaryQuery.data?.month ?? 0)}
+            />
+            <StatCard
+              label="Bu Yıl"
+              value={formatCurrency(expenseSummaryQuery.data?.year ?? 0)}
+            />
+            <StatCard
+              label="Toplam"
+              value={formatCurrency(expenseSummaryQuery.data?.total ?? 0)}
+            />
+          </View>
+          <Button
+            title="+ Masraf Ekle"
+            onPress={() => router.push('/(app)/more/expenses')}
+            style={{ marginBottom: 12 }}
+          />
           {(expensesQuery.data ?? []).length === 0 ? (
             <EmptyState title="Masraf kaydı yok." />
           ) : (
             (expensesQuery.data ?? []).map((item) => (
               <Card key={item.id} style={styles.historyCard}>
-                <Text style={styles.historyTitle}>{item.category}</Text>
+                <Text style={styles.historyTitle}>
+                  {expenseCategoryLabel(item.category)}
+                </Text>
                 <Text style={styles.historyMeta}>
                   {formatDate(item.expense_date)} · {formatCurrency(item.amount)}
                 </Text>
+                {(item as { vendor?: string | null }).vendor ? (
+                  <Text style={styles.historyMeta}>
+                    {(item as { vendor: string }).vendor}
+                  </Text>
+                ) : null}
                 {item.description ? (
                   <Text style={styles.historyMeta}>{item.description}</Text>
                 ) : null}
@@ -452,6 +503,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.md,
+  },
+  kpiRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.md,
+    marginBottom: spacing.md,
   },
   tabs: { gap: spacing.sm, paddingVertical: spacing.sm },
   tab: {

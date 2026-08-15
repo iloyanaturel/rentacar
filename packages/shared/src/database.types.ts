@@ -37,6 +37,8 @@ export type ExpenseCategory =
   | 'TIRES'
   | 'REPAIR'
   | 'CLEANING'
+  | 'TOLL'
+  | 'PARKING'
   | 'OTHER';
 
 export type MaintenanceType =
@@ -47,6 +49,12 @@ export type MaintenanceType =
   | 'BATTERY'
   | 'INSPECTION'
   | 'OTHER';
+
+export type MaintenanceStatus =
+  | 'SCHEDULED'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'CANCELLED';
 
 export type RentalPhotoType = 'PICKUP' | 'RETURN' | 'DAMAGE' | 'OTHER';
 export type FuelLevel =
@@ -623,6 +631,10 @@ export interface Database {
           expense_date: string;
           description: string | null;
           receipt_url: string | null;
+          vendor: string | null;
+          notes: string | null;
+          maintenance_id: string | null;
+          deleted_at: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -636,6 +648,10 @@ export interface Database {
           expense_date?: string;
           description?: string | null;
           receipt_url?: string | null;
+          vendor?: string | null;
+          notes?: string | null;
+          maintenance_id?: string | null;
+          deleted_at?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -648,13 +664,19 @@ export interface Database {
           organization_id: string;
           vehicle_id: string;
           maintenance_type: MaintenanceType;
+          title: string | null;
           maintenance_date: string;
+          scheduled_date: string | null;
+          completed_date: string | null;
           current_km: number | null;
           service_name: string | null;
           amount: number;
+          status: MaintenanceStatus;
+          notes: string | null;
           next_maintenance_date: string | null;
           next_maintenance_km: number | null;
           description: string | null;
+          deleted_at: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -664,13 +686,19 @@ export interface Database {
           organization_id: string;
           vehicle_id: string;
           maintenance_type?: MaintenanceType;
+          title?: string | null;
           maintenance_date?: string;
+          scheduled_date?: string | null;
+          completed_date?: string | null;
           current_km?: number | null;
           service_name?: string | null;
           amount?: number;
+          status?: MaintenanceStatus;
+          notes?: string | null;
           next_maintenance_date?: string | null;
           next_maintenance_km?: number | null;
           description?: string | null;
+          deleted_at?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;

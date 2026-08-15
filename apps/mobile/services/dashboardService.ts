@@ -166,4 +166,15 @@ export const dashboardService = {
   getMonthlyFinancialSummary(summary: DashboardSummary) {
     return summary.finance;
   },
+
+  async getOpsTodaySummary(): Promise<{
+    handovers_today: number;
+    returns_today: number;
+    overdue: number;
+    payments_due: number;
+    maintenance_upcoming: number;
+    documents_expiring: number;
+  }> {
+    return callRpc('get_ops_today_summary');
+  },
 };

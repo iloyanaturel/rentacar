@@ -430,6 +430,7 @@ export const vehiclesService = {
       .from('maintenance_records')
       .select('*')
       .eq('vehicle_id', vehicleId)
+      .is('deleted_at', null)
       .order('maintenance_date', { ascending: false })
       .limit(50);
 
@@ -442,6 +443,7 @@ export const vehiclesService = {
       .from('expenses')
       .select('*')
       .eq('vehicle_id', vehicleId)
+      .is('deleted_at', null)
       .order('expense_date', { ascending: false })
       .limit(50);
 

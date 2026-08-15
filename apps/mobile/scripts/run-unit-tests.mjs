@@ -12,6 +12,12 @@ import {
   calculateFuelDifference,
   calculateLateDuration,
 } from '../utils/operations.ts';
+import { findVehicleOverlaps, getRangeForView } from '../utils/calendar.ts';
+import {
+  expenseCategoryLabel,
+  maintenanceStatusLabel,
+  maintenanceTypeLabel,
+} from '../utils/labels.ts';
 
 function run(name, fn) {
   try {
@@ -165,4 +171,62 @@ run('calculateLateDuration and fuel difference', () => {
   assert.equal(fuel.deltaPercent, 50);
 });
 
-console.log('ALL STEP 6 UNIT TESTS PASSED');
+run('calendar getRangeForView week/month/day', () => {
+  const anchor = new Date(2026, 7, 15); // 15 Aug 2026 Saturday
+  const week = getRangeForView(anchor, 'week');
+  assert.equal(week.from, '2026-08-10');
+  assert.equal(week.to, '2026-08-16');
+  const day = getRangeForView(anchor, 'day');
+  assert.equal(day.from, '2026-08-15');
+  assert.equal(day.to, '2026-08-15');
+  const month = getRangeForView(anchor, 'month');
+  assert.equal(month.from, '2026-08-01');
+  assert.equal(month.to, '2026-08-31');
+});
+
+run('calendar findVehicleOverlaps', () => {
+  const overlaps = findVehicleOverlaps([
+    {
+      rental_id: 'a',
+      vehicle_id: 'v1',
+      plate: '34',
+      brand: 'A',
+      model: 'B',
+      customer_id: 'c',
+      customer_name: 'X',
+      start_date: '2026-08-10',
+      start_time: '10:00',
+      end_date: '2026-08-15',
+      end_time: '10:00',
+      status: 'ACTIVE',
+      display_status: 'ACTIVE',
+      total_amount: 1,
+    },
+    {
+      rental_id: 'b',
+      vehicle_id: 'v1',
+      plate: '34',
+      brand: 'A',
+      model: 'B',
+      customer_id: 'c',
+      customer_name: 'Y',
+      start_date: '2026-08-14',
+      start_time: '10:00',
+      end_date: '2026-08-20',
+      end_time: '10:00',
+      status: 'RESERVED',
+      display_status: 'RESERVED',
+      total_amount: 1,
+    },
+  ]);
+  assert.equal(overlaps.has('a'), true);
+  assert.equal(overlaps.has('b'), true);
+});
+
+run('maintenance and expense labels TR', () => {
+  assert.equal(maintenanceTypeLabel('OIL_CHANGE'), 'Yağ değişimi');
+  assert.equal(maintenanceStatusLabel('IN_PROGRESS'), 'Devam ediyor');
+  assert.equal(expenseCategoryLabel('TOLL'), 'HGS/OGS');
+});
+
+console.log('ALL STEP 7 UNIT TESTS PASSED');
