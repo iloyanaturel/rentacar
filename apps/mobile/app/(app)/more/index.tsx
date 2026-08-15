@@ -49,7 +49,7 @@ export default function MoreScreen() {
         <ListItem title="Ödemeler" onPress={() => router.push('/(app)/more/payments')} />
         <ListItem title="Masraflar" onPress={() => router.push('/(app)/more/expenses')} />
         <ListItem title="Bakım" onPress={() => router.push('/(app)/more/maintenance')} />
-        <ListItem title="Raporlar" onPress={() => router.push('/(app)/more/reports')} />
+        <ListItem title="Raporlar" onPress={() => router.push('/(app)/reports')} />
         <ListItem
           title={
             unreadCount > 0 ? `Bildirimler (${unreadCount})` : 'Bildirimler'

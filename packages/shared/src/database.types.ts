@@ -346,6 +346,14 @@ export interface Database {
           late_fee: number;
           return_notes: string | null;
           notes: string | null;
+          contract_number: string | null;
+          customer_first_name: string | null;
+          customer_last_name: string | null;
+          customer_phone: string | null;
+          customer_address: string | null;
+          vehicle_plate: string | null;
+          vehicle_brand: string | null;
+          vehicle_model: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;

@@ -21,6 +21,8 @@ import {
   useUpcomingRentals,
 } from '@/features/dashboard/hooks';
 import { useMaintenances, useUnreadNotificationCount } from '@/features/ops/hooks';
+import { useFinancialSummary } from '@/features/reports/hooks';
+import { getRangeForPreset } from '@/utils/reportRange';
 import { VehicleStatusChart } from '@/features/dashboard/VehicleStatusChart';
 import { TodayReturnCard } from '@/features/dashboard/TodayReturnCard';
 import { UpcomingRentalRow } from '@/features/dashboard/UpcomingRentalRow';
@@ -57,6 +59,8 @@ export default function DashboardScreen() {
   const upcomingQuery = useUpcomingRentals();
   const maintenanceQuery = useMaintenances({ status: 'SCHEDULED' });
   const unreadQuery = useUnreadNotificationCount();
+  const monthRange = getRangeForPreset('this_month');
+  const monthFinanceQuery = useFinancialSummary(monthRange.from, monthRange.to);
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Kullanıcı';
   const todayLabel = formatFriendlyDate(getTodayInIstanbul(), {
@@ -150,6 +154,31 @@ export default function DashboardScreen() {
             <StatCard
               label="Bakımda"
               value={summaryQuery.data.vehicles.maintenance}
+            />
+          </View>
+
+          <SectionHeader title="Bu Ay" />
+          <View style={styles.kpiGrid}>
+            <StatCard
+              label="Ciro"
+              value={formatCurrency(summaryQuery.data.finance.month_booked_amount)}
+            />
+            <StatCard
+              label="Tahsilat"
+              value={formatCurrency(
+                summaryQuery.data.finance.month_collected_amount,
+              )}
+            />
+            <StatCard
+              label="Bekleyen"
+              value={formatCurrency(summaryQuery.data.finance.outstanding_amount)}
+            />
+            <StatCard
+              label="Masraf / Net"
+              value={formatCurrency(
+                monthFinanceQuery.data?.expenses ?? 0,
+              )}
+              hint={`Net ${formatCurrency(monthFinanceQuery.data?.net_income ?? 0)}`}
             />
           </View>
 

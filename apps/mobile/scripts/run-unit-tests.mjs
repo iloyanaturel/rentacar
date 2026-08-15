@@ -18,6 +18,7 @@ import {
   maintenanceStatusLabel,
   maintenanceTypeLabel,
 } from '../utils/labels.ts';
+import { getRangeForPreset } from '../utils/reportRange.ts';
 
 function run(name, fn) {
   try {
@@ -229,4 +230,12 @@ run('maintenance and expense labels TR', () => {
   assert.equal(expenseCategoryLabel('TOLL'), 'HGS/OGS');
 });
 
-console.log('ALL STEP 7 UNIT TESTS PASSED');
+run('reportRange this_month / today', () => {
+  const month = getRangeForPreset('this_month');
+  assert.equal(month.from.slice(8), '01');
+  assert.ok(month.to >= month.from);
+  const today = getRangeForPreset('today');
+  assert.equal(today.from, today.to);
+});
+
+console.log('ALL STEP 8 UNIT TESTS PASSED');

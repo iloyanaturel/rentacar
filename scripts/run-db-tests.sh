@@ -58,4 +58,7 @@ sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/te
 echo "==> Running calendar / ops tests (STEP 7)"
 sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/tests/05_calendar_ops_tests.sql"
 
+echo "==> Running reporting tests (STEP 8)"
+sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/tests/06_reporting_tests.sql"
+
 echo "==> OK"

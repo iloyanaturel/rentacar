@@ -85,6 +85,15 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="reports"
+        options={{
+          title: 'Raporlar',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="bar-chart-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="more"
         options={{
           title: 'Daha Fazla',

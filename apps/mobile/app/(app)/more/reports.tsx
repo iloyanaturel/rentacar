@@ -1,22 +1,5 @@
-import { StyleSheet, View } from 'react-native';
-import { EmptyState } from '@/components/ui';
-import { colors, spacing } from '@/theme';
+import { Redirect } from 'expo-router';
 
-export default function ReportsPlaceholder() {
-  return (
-    <View style={styles.screen}>
-      <EmptyState
-        title="Raporlar yakında"
-        description="Finansal ve operasyonel özetler burada hazır olacak."
-      />
-    </View>
-  );
+export default function ReportsRedirect() {
+  return <Redirect href="/(app)/reports" />;
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-    padding: spacing.lg,
-  },
-});

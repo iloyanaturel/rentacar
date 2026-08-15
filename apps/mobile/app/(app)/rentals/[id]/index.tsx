@@ -203,6 +203,27 @@ export default function RentalDetailScreen() {
         <PaymentStatusBadge
           status={finance?.payment_status ?? rental.payment_status}
         />
+        <Button
+          title="PDF Sözleşme"
+          variant="secondary"
+          onPress={() => {
+            void (async () => {
+              try {
+                const { exportRentalContractPdf } = await import(
+                  '@/features/reports/export'
+                );
+                const number = await exportRentalContractPdf(rental.id);
+                Alert.alert(
+                  'Sözleşme hazır',
+                  number ? `Sözleşme no: ${number}` : 'PDF oluşturuldu.',
+                );
+              } catch (e) {
+                Alert.alert('Hata', getErrorMessage(e, 'PDF oluşturulamadı.'));
+              }
+            })();
+          }}
+          style={{ marginTop: 8 }}
+        />
       </Card>
 
       <SectionHeader title="Teslim" />
