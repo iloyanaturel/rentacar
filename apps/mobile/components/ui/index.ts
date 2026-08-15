@@ -6,6 +6,7 @@ export { ScreenHeader } from './ScreenHeader';
 export { StatCard } from './StatCard';
 export { VehicleStatusBadge } from './VehicleStatusBadge';
 export { PaymentStatusBadge } from './PaymentStatusBadge';
+export { RentalStatusBadge } from './RentalStatusBadge';
 export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';
 export { LoadingSkeleton, DashboardSkeleton } from './LoadingSkeleton';

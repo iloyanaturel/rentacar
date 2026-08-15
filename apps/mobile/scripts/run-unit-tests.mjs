@@ -6,6 +6,8 @@ import { getErrorMessage } from '../utils/errors.ts';
 import { formatPlateDisplay, normalizePlateKey } from '../utils/plate.ts';
 import { getExpiryStatus } from '../utils/expiry.ts';
 import { vehicleFormSchema } from '../features/vehicles/schemas.ts';
+import { calcRentalPricing } from '../utils/rentalPricing.ts';
+import { customerFormSchema } from '../features/customers/schemas.ts';
 
 function run(name, fn) {
   try {
@@ -74,4 +76,76 @@ run('getExpiryStatus expired/critical/warning', () => {
   assert.equal(critical.level, 'critical');
 });
 
-console.log('ALL STEP 4 UNIT TESTS PASSED');
+run('calcRentalPricing 5 days × 1500 − 500 + deposit', () => {
+  const pricing = calcRentalPricing({
+    dailyPrice: 1500,
+    startDate: '2026-08-15',
+    startTime: '14:00',
+    endDate: '2026-08-20',
+    endTime: '14:00',
+    discount: 500,
+    extra: 0,
+    deposit: 3000,
+  });
+  assert.equal(pricing.days, 5);
+  assert.equal(pricing.subtotal, 7500);
+  assert.equal(pricing.total, 7000);
+  assert.equal(pricing.deposit, 3000);
+  assert.equal(pricing.payable, 10000);
+});
+
+run('calcRentalPricing rejects discount > subtotal', () => {
+  assert.throws(
+    () =>
+      calcRentalPricing({
+        dailyPrice: 1000,
+        startDate: '2026-08-15',
+        startTime: '10:00',
+        endDate: '2026-08-16',
+        endTime: '10:00',
+        discount: 5000,
+        extra: 0,
+        deposit: 0,
+      }),
+    /İndirim/,
+  );
+});
+
+run('customerFormSchema phone/email/tc', () => {
+  assert.equal(
+    customerFormSchema.safeParse({
+      first_name: 'Ahmet',
+      last_name: 'Yılmaz',
+      phone: '05321234567',
+    }).success,
+    true,
+  );
+  assert.equal(
+    customerFormSchema.safeParse({
+      first_name: 'A',
+      last_name: 'B',
+      phone: '123',
+    }).success,
+    false,
+  );
+  assert.equal(
+    customerFormSchema.safeParse({
+      first_name: 'A',
+      last_name: 'B',
+      phone: '05321234567',
+      email: 'bad',
+    }).success,
+    false,
+  );
+  assert.equal(
+    customerFormSchema.safeParse({
+      first_name: 'A',
+      last_name: 'B',
+      phone: '05321234567',
+      national_id: '123',
+    }).success,
+    false,
+  );
+});
+
+console.log('ALL STEP 5 UNIT TESTS PASSED');

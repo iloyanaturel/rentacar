@@ -218,13 +218,7 @@ export default function VehicleDetailScreen() {
         <Button
           title="Kiralama Oluştur"
           variant="ghost"
-          onPress={() => {
-            // TODO(STEP 5): navigate to rental create with vehicleId
-            Alert.alert(
-              'Yakında',
-              'Kiralama oluşturma bir sonraki adımda eklenecek.',
-            );
-          }}
+          onPress={() => router.push('/(app)/rentals/create')}
         />
         <Button title="Aracı Sil" variant="danger" onPress={confirmArchive} />
       </View>

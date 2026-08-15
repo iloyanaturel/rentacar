@@ -30,6 +30,30 @@ export function vehicleStatusLabel(
   }
 }
 
+export function rentalStatusLabel(
+  status: 'RESERVED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'OVERDUE',
+): string {
+  switch (status) {
+    case 'RESERVED':
+      return 'Rezervasyon';
+    case 'ACTIVE':
+      return 'Aktif';
+    case 'COMPLETED':
+      return 'Tamamlandı';
+    case 'CANCELLED':
+      return 'İptal';
+    case 'OVERDUE':
+      return 'Gecikmiş';
+  }
+}
+
+export function maskPhone(phone?: string | null): string {
+  if (!phone) return '—';
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length < 7) return phone;
+  return `${digits.slice(0, 4)} XXX XX ${digits.slice(-2)}`;
+}
+
 export function roleLabel(role: 'admin' | 'staff' | 'viewer'): string {
   switch (role) {
     case 'admin':

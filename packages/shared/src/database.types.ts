@@ -733,6 +733,44 @@ export interface Database {
         Args: { p_vehicle_id: string };
         Returns: Database['public']['Tables']['vehicles']['Row'];
       };
+      check_vehicle_availability: {
+        Args: {
+          p_vehicle_id: string;
+          p_start_date: string;
+          p_start_time: string;
+          p_end_date: string;
+          p_end_time: string;
+          p_exclude_rental_id?: string | null;
+        };
+        Returns: boolean;
+      };
+      start_rental: {
+        Args: { p_rental_id: string };
+        Returns: Database['public']['Tables']['rentals']['Row'];
+      };
+      archive_customer: {
+        Args: { p_customer_id: string };
+        Returns: Database['public']['Tables']['customers']['Row'];
+      };
+      get_customer_stats: {
+        Args: { p_customer_id: string };
+        Returns: Json;
+      };
+      update_reserved_rental: {
+        Args: {
+          p_rental_id: string;
+          p_start_date: string;
+          p_start_time: string;
+          p_end_date: string;
+          p_end_time: string;
+          p_daily_price: number;
+          p_discount_amount?: number;
+          p_extra_charge?: number;
+          p_deposit_amount?: number;
+          p_notes?: string | null;
+        };
+        Returns: Database['public']['Tables']['rentals']['Row'];
+      };
     };
     Enums: {
       user_role: UserRole;

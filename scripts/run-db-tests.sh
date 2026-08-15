@@ -49,4 +49,7 @@ sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/te
 echo "==> Running vehicle tests"
 sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/tests/02_vehicle_tests.sql"
 
+echo "==> Running customer + rental tests"
+sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/tests/03_customers_rentals_tests.sql"
+
 echo "==> OK"
