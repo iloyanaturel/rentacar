@@ -78,7 +78,7 @@ Her adımda: kod → TypeScript → lint/build → schema-model uyumu → UX.
 
 ---
 
-## STEP 7 — Kiralama modülü
+## STEP 6 — Kiralama modülü
 
 **Hedef:**
 - 3 adımlı wizard: araç (yalnızca AVAILABLE) → müşteri → tarihler/fiyat
@@ -91,7 +91,7 @@ Her adımda: kod → TypeScript → lint/build → schema-model uyumu → UX.
 
 ---
 
-## STEP 8 — Ödeme modülü
+## STEP 7 — Ödeme modülü
 
 **Hedef:**
 - Ödeme CRUD (liste + kiralama üzerinden ekleme)
@@ -103,7 +103,7 @@ Her adımda: kod → TypeScript → lint/build → schema-model uyumu → UX.
 
 ---
 
-## STEP 9 — Teslim / iade
+## STEP 8 — Teslim / iade
 
 **Hedef:**
 - “Aracı Teslim Al” ekranı: tarih/saat, KM, yakıt, hasar notu, ek ücret, geç teslim, foto
@@ -114,7 +114,7 @@ Her adımda: kod → TypeScript → lint/build → schema-model uyumu → UX.
 
 ---
 
-## STEP 10 — Temel raporlar
+## STEP 9 — Temel raporlar
 
 **Hedef:**
 - Finans: gelir (kiralanan tutar vs tahsilat ayrı), masraf, net
