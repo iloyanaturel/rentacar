@@ -93,7 +93,7 @@ BEGIN
   PERFORM test.assert_true(exp_count = 1, 'no duplicate maintenance expense');
   RAISE NOTICE 'PASS STEP7: complete maintenance + expense once';
 
-  SELECT * INTO settings_row FROM public.ensure_notification_settings(NULL);
+  SELECT * INTO settings_row FROM public.ensure_notification_settings();
   PERFORM test.assert_true(settings_row.user_id = admin1, 'notification settings ensured');
 
   n_count := public.refresh_operational_notifications();

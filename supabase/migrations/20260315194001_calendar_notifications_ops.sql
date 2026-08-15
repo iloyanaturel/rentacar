@@ -435,7 +435,7 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Notification helpers
 -- ---------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.ensure_notification_settings(p_user_id UUID DEFAULT auth.uid())
+CREATE OR REPLACE FUNCTION public.ensure_notification_settings(p_user_id UUID DEFAULT NULL)
 RETURNS public.notification_settings
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -443,13 +443,18 @@ SET search_path = public
 AS $$
 DECLARE
   v_org UUID := public.get_user_organization_id();
+  v_user UUID := COALESCE(p_user_id, auth.uid());
   v_row public.notification_settings%ROWTYPE;
 BEGIN
-  SELECT * INTO v_row FROM public.notification_settings WHERE user_id = p_user_id;
+  IF v_user IS NULL THEN
+    RAISE EXCEPTION 'Kullanıcı bulunamadı.';
+  END IF;
+
+  SELECT * INTO v_row FROM public.notification_settings WHERE user_id = v_user;
   IF FOUND THEN RETURN v_row; END IF;
 
   INSERT INTO public.notification_settings (organization_id, user_id)
-  VALUES (v_org, p_user_id)
+  VALUES (v_org, v_user)
   RETURNING * INTO v_row;
   RETURN v_row;
 END;
@@ -534,27 +539,26 @@ AS $$
 DECLARE
   v_org UUID := public.get_user_organization_id();
   v_count INTEGER := 0;
-  r RECORD;
+  rec RECORD;
   today_d DATE := (now() AT TIME ZONE 'Europe/Istanbul')::date;
 BEGIN
   IF v_org IS NULL THEN RETURN 0; END IF;
 
-  -- Overdue rentals
-  FOR r IN
-    SELECT r.id, v.plate, v.brand, v.model,
+  FOR rec IN
+    SELECT rent.id AS id, v.plate, v.brand, v.model,
            (c.first_name || ' ' || c.last_name) AS customer_name
-    FROM public.rentals r
-    JOIN public.vehicles v ON v.id = r.vehicle_id
-    JOIN public.customers c ON c.id = r.customer_id
-    WHERE r.organization_id = v_org
-      AND r.deleted_at IS NULL
-      AND r.status = 'ACTIVE'
-      AND (r.end_date + r.end_time) < (now() AT TIME ZONE 'Europe/Istanbul')
+    FROM public.rentals rent
+    JOIN public.vehicles v ON v.id = rent.vehicle_id
+    JOIN public.customers c ON c.id = rent.customer_id
+    WHERE rent.organization_id = v_org
+      AND rent.deleted_at IS NULL
+      AND rent.status = 'ACTIVE'
+      AND (rent.end_date + rent.end_time) < (now() AT TIME ZONE 'Europe/Istanbul')
       AND NOT EXISTS (
         SELECT 1 FROM public.notifications n
         WHERE n.organization_id = v_org
           AND n.type = 'OVERDUE_RENTAL'
-          AND n.related_entity_id = r.id
+          AND n.related_entity_id = rent.id
           AND n.created_at::date = today_d
       )
   LOOP
@@ -563,27 +567,28 @@ BEGIN
     ) VALUES (
       v_org, 'OVERDUE_RENTAL',
       'Geciken teslim',
-      r.brand || ' ' || r.model || ' (' || r.plate || ') teslimi gecikti — ' || r.customer_name,
-      'rental', r.id
+      rec.brand || ' ' || rec.model || ' (' || rec.plate || ') teslimi gecikti — ' || rec.customer_name,
+      'rental', rec.id
     );
     v_count := v_count + 1;
   END LOOP;
 
-  -- Payment due (remaining > 0 on active/completed)
-  FOR r IN
-    SELECT r.id, v.plate, (c.first_name || ' ' || c.last_name) AS customer_name, r.remaining_amount
-    FROM public.rentals r
-    JOIN public.vehicles v ON v.id = r.vehicle_id
-    JOIN public.customers c ON c.id = r.customer_id
-    WHERE r.organization_id = v_org
-      AND r.deleted_at IS NULL
-      AND r.remaining_amount > 0
-      AND r.status IN ('ACTIVE', 'COMPLETED', 'RESERVED')
+  FOR rec IN
+    SELECT rent.id AS id, v.plate,
+           (c.first_name || ' ' || c.last_name) AS customer_name,
+           rent.remaining_amount
+    FROM public.rentals rent
+    JOIN public.vehicles v ON v.id = rent.vehicle_id
+    JOIN public.customers c ON c.id = rent.customer_id
+    WHERE rent.organization_id = v_org
+      AND rent.deleted_at IS NULL
+      AND rent.remaining_amount > 0
+      AND rent.status IN ('ACTIVE', 'COMPLETED', 'RESERVED')
       AND NOT EXISTS (
         SELECT 1 FROM public.notifications n
         WHERE n.organization_id = v_org
           AND n.type = 'PAYMENT_DUE'
-          AND n.related_entity_id = r.id
+          AND n.related_entity_id = rent.id
           AND n.created_at::date = today_d
       )
   LOOP
@@ -592,15 +597,14 @@ BEGIN
     ) VALUES (
       v_org, 'PAYMENT_DUE',
       'Ödeme bekliyor',
-      r.customer_name || ' — ' || r.plate || ' için ' || r.remaining_amount::text || ' ₺ kaldı',
-      'rental', r.id
+      rec.customer_name || ' — ' || rec.plate || ' için ' || rec.remaining_amount::text || ' ₺ kaldı',
+      'rental', rec.id
     );
     v_count := v_count + 1;
   END LOOP;
 
-  -- Document expiring (30 days)
-  FOR r IN
-    SELECT v.id, v.plate, v.brand, v.model, 'insurance' AS doc, v.insurance_expiry AS expiry
+  FOR rec IN
+    SELECT v.id AS id, v.plate, v.brand, v.model, 'insurance' AS doc, v.insurance_expiry AS expiry
     FROM public.vehicles v
     WHERE v.organization_id = v_org AND v.deleted_at IS NULL
       AND v.insurance_expiry IS NOT NULL
@@ -622,8 +626,8 @@ BEGIN
       SELECT 1 FROM public.notifications n
       WHERE n.organization_id = v_org
         AND n.type = 'DOCUMENT_EXPIRING'
-        AND n.related_entity_id = r.id
-        AND n.message ILIKE '%' || r.doc || '%'
+        AND n.related_entity_id = rec.id
+        AND n.message ILIKE '%' || rec.doc || '%'
         AND n.created_at::date = today_d
     ) THEN
       INSERT INTO public.notifications (
@@ -631,20 +635,19 @@ BEGIN
       ) VALUES (
         v_org, 'DOCUMENT_EXPIRING',
         'Belge süresi yaklaşıyor',
-        r.brand || ' ' || r.model || ' (' || r.plate || ') ' || r.doc || ' belgesi ' || r.expiry::text || ' tarihinde bitiyor',
-        'vehicle', r.id
+        rec.brand || ' ' || rec.model || ' (' || rec.plate || ') ' || rec.doc || ' belgesi ' || rec.expiry::text || ' tarihinde bitiyor',
+        'vehicle', rec.id
       );
       v_count := v_count + 1;
       PERFORM public.write_audit_log(
-        v_org, 'DOCUMENT_ALERT_CREATED', 'vehicle', r.id,
-        jsonb_build_object('doc', r.doc)
+        v_org, 'DOCUMENT_ALERT_CREATED', 'vehicle', rec.id,
+        jsonb_build_object('doc', rec.doc)
       );
     END IF;
   END LOOP;
 
-  -- Maintenance due (next 7 days scheduled)
-  FOR r IN
-    SELECT m.id, v.plate, v.brand, v.model, m.scheduled_date
+  FOR rec IN
+    SELECT m.id AS id, v.plate, v.brand, v.model, m.scheduled_date
     FROM public.maintenance_records m
     JOIN public.vehicles v ON v.id = m.vehicle_id
     WHERE m.organization_id = v_org
@@ -664,26 +667,25 @@ BEGIN
     ) VALUES (
       v_org, 'MAINTENANCE_DUE',
       'Bakım zamanı yaklaşıyor',
-      r.brand || ' ' || r.model || ' (' || r.plate || ') bakımı ' || r.scheduled_date::text,
-      'maintenance', r.id
+      rec.brand || ' ' || rec.model || ' (' || rec.plate || ') bakımı ' || rec.scheduled_date::text,
+      'maintenance', rec.id
     );
     v_count := v_count + 1;
   END LOOP;
 
-  -- Return reminders (tomorrow)
-  FOR r IN
-    SELECT r.id, v.plate, v.brand, v.model
-    FROM public.rentals r
-    JOIN public.vehicles v ON v.id = r.vehicle_id
-    WHERE r.organization_id = v_org
-      AND r.deleted_at IS NULL
-      AND r.status = 'ACTIVE'
-      AND r.end_date = today_d + 1
+  FOR rec IN
+    SELECT rent.id AS id, v.plate, v.brand, v.model
+    FROM public.rentals rent
+    JOIN public.vehicles v ON v.id = rent.vehicle_id
+    WHERE rent.organization_id = v_org
+      AND rent.deleted_at IS NULL
+      AND rent.status = 'ACTIVE'
+      AND rent.end_date = today_d + 1
       AND NOT EXISTS (
         SELECT 1 FROM public.notifications n
         WHERE n.organization_id = v_org
           AND n.type = 'RENTAL_RETURN_REMINDER'
-          AND n.related_entity_id = r.id
+          AND n.related_entity_id = rent.id
           AND n.created_at::date = today_d
       )
   LOOP
@@ -692,8 +694,35 @@ BEGIN
     ) VALUES (
       v_org, 'RENTAL_RETURN_REMINDER',
       'Yarın teslim',
-      r.brand || ' ' || r.model || ' (' || r.plate || ') yarın iade edilecek',
-      'rental', r.id
+      rec.brand || ' ' || rec.model || ' (' || rec.plate || ') yarın iade edilecek',
+      'rental', rec.id
+    );
+    v_count := v_count + 1;
+  END LOOP;
+
+  FOR rec IN
+    SELECT rent.id AS id, v.plate, v.brand, v.model
+    FROM public.rentals rent
+    JOIN public.vehicles v ON v.id = rent.vehicle_id
+    WHERE rent.organization_id = v_org
+      AND rent.deleted_at IS NULL
+      AND rent.status = 'RESERVED'
+      AND rent.start_date = today_d + 1
+      AND NOT EXISTS (
+        SELECT 1 FROM public.notifications n
+        WHERE n.organization_id = v_org
+          AND n.type = 'RENTAL_START_REMINDER'
+          AND n.related_entity_id = rent.id
+          AND n.created_at::date = today_d
+      )
+  LOOP
+    INSERT INTO public.notifications (
+      organization_id, type, title, message, related_entity_type, related_entity_id
+    ) VALUES (
+      v_org, 'RENTAL_START_REMINDER',
+      'Yarın teslim edilecek',
+      rec.brand || ' ' || rec.model || ' (' || rec.plate || ') yarın teslim',
+      'rental', rec.id
     );
     v_count := v_count + 1;
   END LOOP;
