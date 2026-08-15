@@ -54,14 +54,35 @@ export function maskPhone(phone?: string | null): string {
   return `${digits.slice(0, 4)} XXX XX ${digits.slice(-2)}`;
 }
 
-export function roleLabel(role: 'admin' | 'staff' | 'viewer'): string {
+export function roleLabel(
+  role: 'owner' | 'admin' | 'manager' | 'staff' | 'viewer' | string,
+): string {
   switch (role) {
+    case 'owner':
+      return 'Sahip';
     case 'admin':
       return 'Yönetici';
+    case 'manager':
+      return 'Müdür';
     case 'staff':
       return 'Personel';
     case 'viewer':
       return 'İzleyici';
+    default:
+      return role;
+  }
+}
+
+export function userStatusLabel(s: 'ACTIVE' | 'INVITED' | 'SUSPENDED' | string): string {
+  switch (s) {
+    case 'ACTIVE':
+      return 'Aktif';
+    case 'INVITED':
+      return 'Davetli';
+    case 'SUSPENDED':
+      return 'Pasif';
+    default:
+      return s;
   }
 }
 

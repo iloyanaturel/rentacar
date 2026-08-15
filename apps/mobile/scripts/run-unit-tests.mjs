@@ -19,6 +19,9 @@ import {
   maintenanceTypeLabel,
 } from '../utils/labels.ts';
 import { getRangeForPreset } from '../utils/reportRange.ts';
+import { permissionsForRole, hasPermission } from '../features/auth/permissions.ts';
+import { calculateExtraKmCharge } from '../utils/extraKm.ts';
+import { roleLabel, userStatusLabel } from '../utils/labels.ts';
 
 function run(name, fn) {
   try {
@@ -238,4 +241,43 @@ run('reportRange this_month / today', () => {
   assert.equal(today.from, today.to);
 });
 
-console.log('ALL STEP 8 UNIT TESTS PASSED');
+run('permissions owner has users.invite and reports.view', () => {
+  const perms = permissionsForRole('owner');
+  assert.equal(hasPermission(perms, 'users.invite'), true);
+  assert.equal(hasPermission(perms, 'reports.view'), true);
+});
+
+run('permissions staff lacks reports and users', () => {
+  const perms = permissionsForRole('staff');
+  assert.equal(hasPermission(perms, 'reports.view'), false);
+  assert.equal(hasPermission(perms, 'users.invite'), false);
+  assert.equal(hasPermission(perms, 'rentals.create'), true);
+});
+
+run('calculateExtraKmCharge 250 km × 5', () => {
+  assert.equal(
+    calculateExtraKmCharge({
+      kmLimit: 1500,
+      startKm: 10000,
+      endKm: 11750,
+      extraKmPrice: 5,
+    }),
+    1250,
+  );
+  assert.equal(
+    calculateExtraKmCharge({
+      kmLimit: null,
+      startKm: 0,
+      endKm: 100,
+      extraKmPrice: 5,
+    }),
+    0,
+  );
+});
+
+run('role and status labels TR', () => {
+  assert.equal(roleLabel('owner'), 'Sahip');
+  assert.equal(userStatusLabel('SUSPENDED'), 'Pasif');
+});
+
+console.log('ALL STEP 9 UNIT TESTS PASSED');

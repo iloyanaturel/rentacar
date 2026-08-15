@@ -61,4 +61,7 @@ sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/te
 echo "==> Running reporting tests (STEP 8)"
 sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/tests/06_reporting_tests.sql"
 
+echo "==> Running settings / security tests (STEP 9)"
+sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/tests/07_settings_security_tests.sql"
+
 echo "==> OK"

@@ -4,12 +4,14 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from 'react-native';
 import { Link } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button, Input } from '@/components/ui';
 import { useAuth } from '@/features/auth';
 import {
@@ -19,9 +21,12 @@ import {
 import { getErrorMessage } from '@/utils/errors';
 import { colors, spacing, typography } from '@/theme';
 
+const REMEMBER_KEY = 'rentaflow.remember_session';
+
 export default function LoginScreen() {
   const { signIn, isConfigured } = useAuth();
   const [formError, setFormError] = useState<string | null>(null);
+  const [remember, setRemember] = useState(true);
 
   const {
     control,
@@ -35,6 +40,7 @@ export default function LoginScreen() {
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
+      await AsyncStorage.setItem(REMEMBER_KEY, remember ? '1' : '0');
       await signIn(values.email, values.password);
     } catch (error) {
       setFormError(
@@ -106,6 +112,15 @@ export default function LoginScreen() {
             )}
           />
 
+          <View style={styles.rememberRow}>
+            <Text style={styles.rememberLabel}>Oturumu hatırla</Text>
+            <Switch
+              value={remember}
+              onValueChange={setRemember}
+              trackColor={{ true: colors.primary, false: colors.border }}
+            />
+          </View>
+
           {formError ? <Text style={styles.error}>{formError}</Text> : null}
 
           <Button
@@ -145,6 +160,12 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   form: { gap: spacing.lg },
+  rememberRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  rememberLabel: { ...typography.body, color: colors.text },
   error: {
     ...typography.caption,
     color: colors.danger,

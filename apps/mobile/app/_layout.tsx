@@ -16,9 +16,14 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/features/auth';
 import { AppProviders } from '@/lib/providers';
+import { AppErrorBoundary } from '@/components/AppErrorBoundary';
+import { OfflineBanner } from '@/components/OfflineBanner';
+import { initErrorTracking } from '@/lib/errorTracking';
 import { colors, typography } from '@/theme';
 
-export { ErrorBoundary } from 'expo-router';
+export { AppErrorBoundary as ErrorBoundary } from '@/components/AppErrorBoundary';
+
+initErrorTracking();
 
 SplashScreen.preventAutoHideAsync();
 
@@ -51,18 +56,21 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <AppProviders>
-        <AuthProvider>
-          <StatusBar style="dark" />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(app)" />
-          </Stack>
-        </AuthProvider>
-      </AppProviders>
-    </SafeAreaProvider>
+    <AppErrorBoundary>
+      <SafeAreaProvider>
+        <AppProviders>
+          <AuthProvider>
+            <StatusBar style="dark" />
+            <OfflineBanner />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(app)" />
+            </Stack>
+          </AuthProvider>
+        </AppProviders>
+      </SafeAreaProvider>
+    </AppErrorBoundary>
   );
 }
 

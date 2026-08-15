@@ -2,11 +2,11 @@
   "expo": {
     "name": "RentaFlow",
     "slug": "rentaflow",
-    "version": "0.1.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "rentaflow",
-    "userInterfaceStyle": "light",
+  "version": "1.0.0",
+  "orientation": "portrait",
+  "icon": "./assets/images/icon.png",
+  "scheme": "rentaflow",
+  "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.rentaflow.app"

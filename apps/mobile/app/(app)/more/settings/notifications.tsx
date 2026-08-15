@@ -114,7 +114,7 @@ export default function SettingsScreen() {
         { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + 40 },
       ]}
     >
-      <ScreenHeader title="Bildirimler" subtitle="Hatırlatma tercihleri" />
+      <ScreenHeader title="Bildirim Ayarları" subtitle="Hatırlatma tercihleri" />
 
       {settingsQuery.isError ? (
         <ErrorState

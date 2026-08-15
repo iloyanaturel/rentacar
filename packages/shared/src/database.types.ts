@@ -4,7 +4,9 @@
  * project is linked; this file is the STEP 2 hand-maintained source of truth.
  */
 
-export type UserRole = 'admin' | 'staff' | 'viewer';
+export type UserRole = 'owner' | 'admin' | 'manager' | 'staff' | 'viewer';
+
+export type UserStatus = 'ACTIVE' | 'INVITED' | 'SUSPENDED';
 
 export type VehicleStatus =
   | 'AVAILABLE'
@@ -118,8 +120,13 @@ export interface Database {
           phone: string | null;
           email: string | null;
           address: string | null;
+          website: string | null;
+          tax_office: string | null;
+          tax_number: string | null;
           currency: string;
           timezone: string;
+          locale: string;
+          date_format: string;
           created_at: string;
           updated_at: string;
           deleted_at: string | null;
@@ -131,8 +138,13 @@ export interface Database {
           phone?: string | null;
           email?: string | null;
           address?: string | null;
+          website?: string | null;
+          tax_office?: string | null;
+          tax_number?: string | null;
           currency?: string;
           timezone?: string;
+          locale?: string;
+          date_format?: string;
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
@@ -146,7 +158,12 @@ export interface Database {
           full_name: string | null;
           phone: string | null;
           role: UserRole;
+          status: UserStatus;
           avatar_url: string | null;
+          invited_at: string | null;
+          invited_by: string | null;
+          suspended_at: string | null;
+          last_sign_in_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -156,12 +173,96 @@ export interface Database {
           full_name?: string | null;
           phone?: string | null;
           role?: UserRole;
+          status?: UserStatus;
           avatar_url?: string | null;
+          invited_at?: string | null;
+          invited_by?: string | null;
+          suspended_at?: string | null;
+          last_sign_in_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
       };
+      organization_settings: {
+        Row: {
+          organization_id: string;
+          currency: string;
+          timezone: string;
+          locale: string;
+          date_format: string;
+          tax_enabled: boolean;
+          tax_rate: number;
+          default_deposit_amount: number;
+          default_daily_km_limit: number | null;
+          extra_km_price: number;
+          late_return_tolerance_minutes: number;
+          late_return_fee: number;
+          contract_title: string;
+          contract_footer: string | null;
+          contract_body: string | null;
+          onboarding_business_done: boolean;
+          onboarding_vehicle_done: boolean;
+          onboarding_user_done: boolean;
+          onboarding_rental_done: boolean;
+          onboarding_completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          currency?: string;
+          timezone?: string;
+          locale?: string;
+          date_format?: string;
+          tax_enabled?: boolean;
+          tax_rate?: number;
+          default_deposit_amount?: number;
+          default_daily_km_limit?: number | null;
+          extra_km_price?: number;
+          late_return_tolerance_minutes?: number;
+          late_return_fee?: number;
+          contract_title?: string;
+          contract_footer?: string | null;
+          contract_body?: string | null;
+          onboarding_business_done?: boolean;
+          onboarding_vehicle_done?: boolean;
+          onboarding_user_done?: boolean;
+          onboarding_rental_done?: boolean;
+          onboarding_completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['organization_settings']['Insert']>;
+      };
+      organization_invitations: {
+        Row: {
+          id: string;
+          organization_id: string;
+          email: string;
+          full_name: string | null;
+          role: UserRole;
+          token: string;
+          invited_by: string | null;
+          accepted_at: string | null;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          email: string;
+          full_name?: string | null;
+          role?: UserRole;
+          token?: string;
+          invited_by?: string | null;
+          accepted_at?: string | null;
+          expires_at?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['organization_invitations']['Insert']>;
+      };
+
       vehicles: {
         Row: {
           id: string;
@@ -347,6 +448,14 @@ export interface Database {
           return_notes: string | null;
           notes: string | null;
           contract_number: string | null;
+          km_limit: number | null;
+          extra_km_price: number | null;
+          late_return_tolerance_minutes: number | null;
+          late_return_fee_snapshot: number | null;
+          tax_rate: number | null;
+          currency: string | null;
+          contract_title_snapshot: string | null;
+          contract_body_snapshot: string | null;
           customer_first_name: string | null;
           customer_last_name: string | null;
           customer_phone: string | null;
@@ -1101,9 +1210,83 @@ export interface Database {
         };
         Returns: Database['public']['Tables']['rentals']['Row'];
       };
+
+      ensure_organization_settings: {
+        Args: Record<string, never>;
+        Returns: Database['public']['Tables']['organization_settings']['Row'];
+      };
+      update_organization_settings: {
+        Args: { p_patch: Json };
+        Returns: Database['public']['Tables']['organization_settings']['Row'];
+      };
+      update_business_profile: {
+        Args: { p_patch: Json };
+        Returns: Database['public']['Tables']['organizations']['Row'];
+      };
+      list_organization_users: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      invite_organization_user: {
+        Args: {
+          p_email: string;
+          p_full_name: string;
+          p_role?: UserRole;
+        };
+        Returns: Database['public']['Tables']['organization_invitations']['Row'];
+      };
+      set_user_status: {
+        Args: { p_user_id: string; p_status: UserStatus };
+        Returns: Database['public']['Tables']['profiles']['Row'];
+      };
+      set_user_role: {
+        Args: { p_user_id: string; p_role: UserRole };
+        Returns: Database['public']['Tables']['profiles']['Row'];
+      };
+      get_user_permissions: {
+        Args: Record<string, never>;
+        Returns: string[];
+      };
+      get_onboarding_status: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      touch_last_sign_in: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      calculate_extra_km_charge: {
+        Args: { p_rental_id: string; p_end_odometer: number };
+        Returns: Json;
+      };
+      can_view_reports: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      can_manage_users: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      can_manage_settings: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_user_active: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      update_own_profile: {
+        Args: { p_patch: Json };
+        Returns: Database['public']['Tables']['profiles']['Row'];
+      };
+      record_auth_event: {
+        Args: { p_action: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       user_role: UserRole;
+      user_status: UserStatus;
       vehicle_status: VehicleStatus;
       rental_status: RentalStatus;
       payment_method: PaymentMethod;

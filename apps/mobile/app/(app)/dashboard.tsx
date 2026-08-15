@@ -11,6 +11,7 @@ import {
   StatCard,
 } from '@/components/ui';
 import { useAuth } from '@/features/auth';
+import { useOnboardingStatus } from '@/features/settings';
 import {
   useDashboardStats,
   useOpsTodaySummary,
@@ -66,6 +67,7 @@ export default function DashboardScreen() {
   const todayLabel = formatFriendlyDate(getTodayInIstanbul(), {
     withTodayPrefix: true,
   });
+  const onboarding = useOnboardingStatus();
 
   const upcomingMaintenance = useMemo(
     () => (maintenanceQuery.data ?? []).slice(0, 5),
@@ -125,6 +127,17 @@ export default function DashboardScreen() {
             ) : null}
           </Pressable>
         </View>
+        {onboarding.data && !onboarding.data.completed ? (
+          <Pressable
+            style={styles.onboardingBanner}
+            onPress={() => router.push('/(app)/onboarding')}
+          >
+            <Text style={styles.onboardingTitle}>Kurulumu tamamlayın</Text>
+            <Text style={styles.onboardingSub}>
+              %{onboarding.data.percent} · İlk araç ve ayarlar için dokunun
+            </Text>
+          </Pressable>
+        ) : null}
         <TextInput
           value={search}
           onChangeText={setSearch}
@@ -403,6 +416,14 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontFamily: 'DMSans_400Regular',
   },
+  onboardingBanner: {
+    backgroundColor: colors.primarySoft,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    gap: 4,
+  },
+  onboardingTitle: { ...typography.bodyMedium, color: colors.primary },
+  onboardingSub: { ...typography.caption, color: colors.textSecondary },
   kpiGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

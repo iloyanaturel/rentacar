@@ -2,10 +2,12 @@ import { Redirect, Tabs } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/features/auth';
+import { usePermissions } from '@/features/settings';
 import { colors } from '@/theme';
 
 export default function AppLayout() {
   const { status } = useAuth();
+  const { can } = usePermissions();
 
   if (status === 'loading') {
     return (
@@ -38,6 +40,13 @@ export default function AppLayout() {
         },
       }}
     >
+      <Tabs.Screen
+        name="onboarding"
+        options={{
+          href: null,
+          title: 'Kurulum',
+        }}
+      />
       <Tabs.Screen
         name="dashboard"
         options={{
@@ -88,6 +97,7 @@ export default function AppLayout() {
         name="reports"
         options={{
           title: 'Raporlar',
+          href: can('reports.view') ? undefined : null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="bar-chart-outline" color={color} size={size} />
           ),

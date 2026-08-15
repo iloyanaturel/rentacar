@@ -1,6 +1,8 @@
 import { endOfMonth, endOfWeek, endOfYear, format, startOfMonth, startOfWeek, startOfYear, subMonths } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
-import { APP_TIMEZONE } from './date.ts';
+
+/** Keep in sync with utils/date APP_TIMEZONE — avoid .ts extension for dual tsc/node runners */
+const APP_TIMEZONE = 'Europe/Istanbul';
 
 export type ReportPreset =
   | 'today'

@@ -31,6 +31,7 @@ import {
   useRevenueBreakdown,
   useVehiclePerformance,
 } from '@/features/reports/hooks';
+import { usePermissions } from '@/features/settings';
 import {
   exportExcelWorkbook,
   exportReportPdf,
@@ -71,7 +72,16 @@ function monthLabel(iso: string): string {
 export default function ReportsScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const { can } = usePermissions();
   const kpiCols = width >= 900 ? 4 : width >= 600 ? 2 : 1;
+
+  if (!can('reports.view')) {
+    return (
+      <View style={[styles.screen, { paddingTop: insets.top + spacing.lg }]}>
+        <ErrorState message="Bu işlem için yetkiniz bulunmuyor." />
+      </View>
+    );
+  }
 
   const [preset, setPreset] = useState<ReportPreset>('this_month');
   const [customFrom, setCustomFrom] = useState('');

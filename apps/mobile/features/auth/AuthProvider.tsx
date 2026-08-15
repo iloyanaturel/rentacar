@@ -6,12 +6,15 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { getErrorMessage } from '@/utils/errors';
 import { queryClient } from '@/lib/queryClient';
+import { settingsService } from '@/services/settingsService';
+import { logger } from '@/utils/logger';
 
 type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -47,6 +50,10 @@ async function fetchProfileBundle(userId: string): Promise<{
 
   const profile = profileData as Profile;
 
+  if ((profile as Profile & { status?: string }).status === 'SUSPENDED') {
+    throw new Error('Hesabınız pasifleştirilmiş. Yöneticinizle iletişime geçin.');
+  }
+
   const { data: organizationData, error: orgError } = await supabase
     .from('organizations')
     .select('*')
@@ -69,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
+  const touchedSignIn = useRef<string | null>(null);
 
   const clearLocal = useCallback(() => {
     setSession(null);
@@ -76,28 +84,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setOrganization(null);
     setStatus('unauthenticated');
     queryClient.clear();
+    touchedSignIn.current = null;
   }, []);
 
-  const loadUserData = useCallback(async (nextSession: Session | null) => {
-    if (!nextSession?.user) {
-      clearLocal();
-      return;
-    }
+  const loadUserData = useCallback(
+    async (nextSession: Session | null) => {
+      if (!nextSession?.user) {
+        clearLocal();
+        return;
+      }
 
-    setSession(nextSession);
-    try {
-      const bundle = await fetchProfileBundle(nextSession.user.id);
-      setProfile(bundle.profile);
-      setOrganization(bundle.organization);
-      setStatus('authenticated');
-    } catch (error) {
-      console.warn('[Auth] profile load failed', getErrorMessage(error));
-      // Session exists but profile missing — still mark authenticated with null org
-      setProfile(null);
-      setOrganization(null);
-      setStatus('authenticated');
-    }
-  }, [clearLocal]);
+      setSession(nextSession);
+      try {
+        const bundle = await fetchProfileBundle(nextSession.user.id);
+        setProfile(bundle.profile);
+        setOrganization(bundle.organization);
+        setStatus('authenticated');
+
+        if (touchedSignIn.current !== nextSession.user.id) {
+          touchedSignIn.current = nextSession.user.id;
+          void settingsService.touchLastSignIn();
+          void settingsService.recordAuthEvent('LOGIN');
+        }
+      } catch (error) {
+        logger.warn('auth.profile_load_failed', {
+          message: getErrorMessage(error),
+        });
+        const message = getErrorMessage(error);
+        if (message.includes('pasifleştirilmiş')) {
+          await supabase.auth.signOut();
+          clearLocal();
+          return;
+        }
+        setProfile(null);
+        setOrganization(null);
+        setStatus('authenticated');
+      }
+    },
+    [clearLocal],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -114,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return loadUserData(data.session);
       })
       .catch((error) => {
-        console.warn('[Auth] getSession', getErrorMessage(error));
+        logger.warn('auth.get_session', { message: getErrorMessage(error) });
         if (mounted) clearLocal();
       });
 
@@ -148,6 +173,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    try {
+      await settingsService.recordAuthEvent('LOGOUT');
+    } catch {
+      // best-effort audit
+    }
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     clearLocal();

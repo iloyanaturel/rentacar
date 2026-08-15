@@ -18,6 +18,7 @@ export type {
   Notification,
   AuditLog,
   UserRole,
+  UserStatus,
   VehicleStatus,
   RentalStatus,
   PaymentMethod,
