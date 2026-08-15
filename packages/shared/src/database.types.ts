@@ -49,6 +49,37 @@ export type MaintenanceType =
   | 'OTHER';
 
 export type RentalPhotoType = 'PICKUP' | 'RETURN' | 'DAMAGE' | 'OTHER';
+export type FuelLevel =
+  | 'EMPTY'
+  | 'QUARTER'
+  | 'HALF'
+  | 'THREE_QUARTERS'
+  | 'FULL';
+export type DepositStatus =
+  | 'PENDING'
+  | 'HELD'
+  | 'PARTIALLY_REFUNDED'
+  | 'REFUNDED'
+  | 'FORFEITED';
+export type DamageSeverity = 'MINOR' | 'MODERATE' | 'MAJOR';
+export type DamageTiming = 'EXISTING' | 'NEW';
+export type RentalPhotoCategory =
+  | 'FRONT'
+  | 'BACK'
+  | 'LEFT'
+  | 'RIGHT'
+  | 'INTERIOR'
+  | 'ODOMETER'
+  | 'FUEL'
+  | 'DAMAGE'
+  | 'OTHER';
+export type ExtraChargeType =
+  | 'FUEL_DIFF'
+  | 'LATE_RETURN'
+  | 'DAMAGE'
+  | 'CLEANING'
+  | 'EXTRA_USAGE'
+  | 'OTHER';
 
 export type FuelType =
   | 'GASOLINE'
@@ -351,6 +382,9 @@ export interface Database {
           organization_id: string;
           rental_id: string;
           type: RentalPhotoType;
+          category: RentalPhotoCategory | null;
+          handover_id: string | null;
+          return_id: string | null;
           storage_path: string;
           public_url: string | null;
           created_at: string;
@@ -360,6 +394,9 @@ export interface Database {
           organization_id: string;
           rental_id: string;
           type?: RentalPhotoType;
+          category?: RentalPhotoCategory | null;
+          handover_id?: string | null;
+          return_id?: string | null;
           storage_path: string;
           public_url?: string | null;
           created_at?: string;
@@ -376,6 +413,9 @@ export interface Database {
           payment_method: PaymentMethod;
           payment_date: string;
           description: string | null;
+          reference_number: string | null;
+          note: string | null;
+          idempotency_key: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -390,12 +430,188 @@ export interface Database {
           payment_method?: PaymentMethod;
           payment_date?: string;
           description?: string | null;
+          reference_number?: string | null;
+          note?: string | null;
+          idempotency_key?: string | null;
           created_by?: string | null;
           created_at?: string;
           updated_at?: string;
           voided_at?: string | null;
         };
         Update: Partial<Database['public']['Tables']['payments']['Insert']>;
+      };
+      rental_deposits: {
+        Row: {
+          id: string;
+          organization_id: string;
+          rental_id: string;
+          amount: number;
+          status: DepositStatus;
+          deducted_amount: number;
+          refunded_amount: number;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          rental_id: string;
+          amount: number;
+          status?: DepositStatus;
+          deducted_amount?: number;
+          refunded_amount?: number;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['rental_deposits']['Insert']>;
+      };
+      rental_handovers: {
+        Row: {
+          id: string;
+          organization_id: string;
+          rental_id: string;
+          odometer_km: number;
+          fuel_level: FuelLevel;
+          fuel_percent: number | null;
+          checklist_confirmed: boolean;
+          customer_ack_name: string | null;
+          notes: string | null;
+          idempotency_key: string | null;
+          created_by: string | null;
+          created_at: string;
+          completed_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          rental_id: string;
+          odometer_km: number;
+          fuel_level: FuelLevel;
+          fuel_percent?: number | null;
+          checklist_confirmed?: boolean;
+          customer_ack_name?: string | null;
+          notes?: string | null;
+          idempotency_key?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          completed_at?: string;
+        };
+        Update: Partial<
+          Database['public']['Tables']['rental_handovers']['Insert']
+        >;
+      };
+      rental_returns: {
+        Row: {
+          id: string;
+          organization_id: string;
+          rental_id: string;
+          odometer_km: number;
+          fuel_level: FuelLevel;
+          fuel_percent: number | null;
+          actual_end_at: string;
+          late_minutes: number;
+          send_to_maintenance: boolean;
+          deposit_action: string | null;
+          deposit_deduction: number;
+          deposit_refund: number;
+          checklist_confirmed: boolean;
+          notes: string | null;
+          idempotency_key: string | null;
+          created_by: string | null;
+          created_at: string;
+          completed_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          rental_id: string;
+          odometer_km: number;
+          fuel_level: FuelLevel;
+          fuel_percent?: number | null;
+          actual_end_at?: string;
+          late_minutes?: number;
+          send_to_maintenance?: boolean;
+          deposit_action?: string | null;
+          deposit_deduction?: number;
+          deposit_refund?: number;
+          checklist_confirmed?: boolean;
+          notes?: string | null;
+          idempotency_key?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          completed_at?: string;
+        };
+        Update: Partial<Database['public']['Tables']['rental_returns']['Insert']>;
+      };
+      rental_damages: {
+        Row: {
+          id: string;
+          organization_id: string;
+          rental_id: string;
+          handover_id: string | null;
+          return_id: string | null;
+          timing: DamageTiming;
+          severity: DamageSeverity;
+          location_key: string;
+          location_label: string | null;
+          description: string | null;
+          estimated_amount: number;
+          photo_storage_path: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+          deleted_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          rental_id: string;
+          handover_id?: string | null;
+          return_id?: string | null;
+          timing?: DamageTiming;
+          severity?: DamageSeverity;
+          location_key?: string;
+          location_label?: string | null;
+          description?: string | null;
+          estimated_amount?: number;
+          photo_storage_path?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          deleted_at?: string | null;
+        };
+        Update: Partial<Database['public']['Tables']['rental_damages']['Insert']>;
+      };
+      rental_extra_charges: {
+        Row: {
+          id: string;
+          organization_id: string;
+          rental_id: string;
+          return_id: string | null;
+          charge_type: ExtraChargeType;
+          description: string | null;
+          amount: number;
+          created_by: string | null;
+          created_at: string;
+          voided_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          rental_id: string;
+          return_id?: string | null;
+          charge_type?: ExtraChargeType;
+          description?: string | null;
+          amount: number;
+          created_by?: string | null;
+          created_at?: string;
+          voided_at?: string | null;
+        };
+        Update: Partial<
+          Database['public']['Tables']['rental_extra_charges']['Insert']
+        >;
       };
       expenses: {
         Row: {
@@ -628,8 +844,86 @@ export interface Database {
           p_payment_method?: PaymentMethod;
           p_payment_date?: string;
           p_description?: string;
+          p_reference_number?: string;
+          p_note?: string;
+          p_idempotency_key?: string;
         };
         Returns: Database['public']['Tables']['payments']['Row'];
+      };
+      reverse_payment: {
+        Args: { p_payment_id: string; p_reason?: string };
+        Returns: Database['public']['Tables']['payments']['Row'];
+      };
+      complete_handover: {
+        Args: {
+          p_rental_id: string;
+          p_odometer_km: number;
+          p_fuel_level: FuelLevel;
+          p_checklist_confirmed?: boolean;
+          p_customer_ack_name?: string;
+          p_notes?: string;
+          p_damages?: Json;
+          p_photo_ids?: string[] | null;
+          p_idempotency_key?: string;
+        };
+        Returns: Database['public']['Tables']['rental_handovers']['Row'];
+      };
+      complete_return: {
+        Args: {
+          p_rental_id: string;
+          p_odometer_km: number;
+          p_fuel_level: FuelLevel;
+          p_actual_end_at?: string;
+          p_send_to_maintenance?: boolean;
+          p_deposit_action?: string;
+          p_deposit_deduction?: number;
+          p_checklist_confirmed?: boolean;
+          p_notes?: string;
+          p_extra_charges?: Json;
+          p_damages?: Json;
+          p_photo_ids?: string[] | null;
+          p_payment_amount?: number | null;
+          p_payment_method?: PaymentMethod;
+          p_idempotency_key?: string;
+        };
+        Returns: Database['public']['Tables']['rental_returns']['Row'];
+      };
+      get_today_handovers: {
+        Args: Record<string, never>;
+        Returns: {
+          rental_id: string;
+          vehicle_id: string;
+          plate: string;
+          brand: string;
+          model: string;
+          customer_name: string;
+          start_date: string;
+          start_time: string;
+          status: RentalStatus;
+        }[];
+      };
+      get_outstanding_payments: {
+        Args: Record<string, never>;
+        Returns: {
+          rental_id: string;
+          plate: string;
+          customer_name: string;
+          total_amount: number;
+          paid_amount: number;
+          remaining_amount: number;
+          status: RentalStatus;
+        }[];
+      };
+      get_overdue_rentals: {
+        Args: Record<string, never>;
+        Returns: {
+          rental_id: string;
+          plate: string;
+          customer_name: string;
+          end_date: string;
+          end_time: string;
+          remaining_amount: number;
+        }[];
       };
       cancel_rental: {
         Args: {
@@ -782,6 +1076,12 @@ export interface Database {
       rental_photo_type: RentalPhotoType;
       fuel_type: FuelType;
       transmission_type: TransmissionType;
+      deposit_status: DepositStatus;
+      fuel_level: FuelLevel;
+      damage_severity: DamageSeverity;
+      damage_timing: DamageTiming;
+      rental_photo_category: RentalPhotoCategory;
+      extra_charge_type: ExtraChargeType;
     };
   };
 }
@@ -801,6 +1101,11 @@ export type Customer = Tables<'customers'>;
 export type Rental = Tables<'rentals'>;
 export type RentalPhoto = Tables<'rental_photos'>;
 export type Payment = Tables<'payments'>;
+export type RentalDeposit = Tables<'rental_deposits'>;
+export type RentalHandover = Tables<'rental_handovers'>;
+export type RentalReturn = Tables<'rental_returns'>;
+export type RentalDamage = Tables<'rental_damages'>;
+export type RentalExtraCharge = Tables<'rental_extra_charges'>;
 export type Expense = Tables<'expenses'>;
 export type MaintenanceRecord = Tables<'maintenance_records'>;
 export type Notification = Tables<'notifications'>;

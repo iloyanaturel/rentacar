@@ -8,6 +8,10 @@ import { getExpiryStatus } from '../utils/expiry.ts';
 import { vehicleFormSchema } from '../features/vehicles/schemas.ts';
 import { calcRentalPricing } from '../utils/rentalPricing.ts';
 import { customerFormSchema } from '../features/customers/schemas.ts';
+import {
+  calculateFuelDifference,
+  calculateLateDuration,
+} from '../utils/operations.ts';
 
 function run(name, fn) {
   try {
@@ -148,4 +152,17 @@ run('customerFormSchema phone/email/tc', () => {
   );
 });
 
-console.log('ALL STEP 5 UNIT TESTS PASSED');
+run('calculateLateDuration and fuel difference', () => {
+  const late = calculateLateDuration(
+    new Date('2026-08-20T14:00:00'),
+    new Date('2026-08-20T18:00:00'),
+  );
+  assert.equal(late.isLate, true);
+  assert.equal(late.lateMinutes, 240);
+
+  const fuel = calculateFuelDifference('FULL', 'HALF');
+  assert.equal(fuel.dropped, true);
+  assert.equal(fuel.deltaPercent, 50);
+});
+
+console.log('ALL STEP 6 UNIT TESTS PASSED');

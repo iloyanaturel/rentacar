@@ -1,4 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Card,
@@ -11,6 +12,9 @@ import {
 import { useAuth } from '@/features/auth';
 import {
   useDashboardStats,
+  useOutstandingPayments,
+  useOverdueRentals,
+  useTodayHandovers,
   useTodayReturns,
   useUpcomingRentals,
 } from '@/features/dashboard/hooks';
@@ -19,14 +23,23 @@ import { TodayReturnCard } from '@/features/dashboard/TodayReturnCard';
 import { UpcomingRentalRow } from '@/features/dashboard/UpcomingRentalRow';
 import { dashboardService } from '@/services/dashboardService';
 import { formatCurrency } from '@/utils/currency';
-import { formatFriendlyDate, getTodayInIstanbul } from '@/utils/date';
+import {
+  formatDate,
+  formatFriendlyDate,
+  formatTime,
+  getTodayInIstanbul,
+} from '@/utils/date';
 import { colors, spacing, typography } from '@/theme';
 
 export default function DashboardScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { profile } = useAuth();
   const summaryQuery = useDashboardStats();
   const todayQuery = useTodayReturns();
+  const handoverQuery = useTodayHandovers();
+  const outstandingQuery = useOutstandingPayments();
+  const overdueQuery = useOverdueRentals();
   const upcomingQuery = useUpcomingRentals();
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Kullanıcı';
@@ -43,6 +56,9 @@ export default function DashboardScreen() {
     void summaryQuery.refetch();
     void todayQuery.refetch();
     void upcomingQuery.refetch();
+    void handoverQuery.refetch();
+    void outstandingQuery.refetch();
+    void overdueQuery.refetch();
   };
 
   return (
@@ -110,15 +126,74 @@ export default function DashboardScreen() {
           </Card>
 
           <SectionHeader title="Bugün Teslim Edilecek" />
+          {(handoverQuery.data ?? []).length > 0 ? (
+            (handoverQuery.data ?? []).map((item) => (
+              <Pressable
+                key={item.rental_id}
+                onPress={() => router.push(`/(app)/rentals/${item.rental_id}`)}
+              >
+                <Card style={styles.listCard}>
+                  <Text style={styles.cardTitle}>
+                    {item.brand} {item.model} · {item.plate}
+                  </Text>
+                  <Text style={styles.cardMeta}>
+                    {item.customer_name} · {formatTime(item.start_time)}
+                  </Text>
+                </Card>
+              </Pressable>
+            ))
+          ) : (
+            <EmptyState title="Bugün teslim edilecek rezervasyon yok." />
+          )}
+
+          <SectionHeader title="Bugün Teslim Alınacak" />
           {todayQuery.data && todayQuery.data.length > 0 ? (
             todayQuery.data.map((item) => (
               <TodayReturnCard key={item.rental_id} item={item} />
             ))
           ) : (
-            <EmptyState
-              title="Bugün teslim edilecek kiralama yok."
-              description="Planlanan teslimler burada listelenir."
-            />
+            <EmptyState title="Bugün teslim alınacak kiralama yok." />
+          )}
+
+          <SectionHeader title="Geciken Araçlar" />
+          {(overdueQuery.data ?? []).length > 0 ? (
+            (overdueQuery.data ?? []).map((item) => (
+              <Pressable
+                key={item.rental_id}
+                onPress={() => router.push(`/(app)/rentals/${item.rental_id}`)}
+              >
+                <Card style={styles.listCard}>
+                  <Text style={styles.cardTitle}>{item.plate}</Text>
+                  <Text style={styles.cardMeta}>
+                    {item.customer_name} · {formatDate(item.end_date)}{' '}
+                    {formatTime(item.end_time)}
+                  </Text>
+                </Card>
+              </Pressable>
+            ))
+          ) : (
+            <EmptyState title="Gecikmiş kiralama yok." />
+          )}
+
+          <SectionHeader title="Tahsil Edilecek Ödemeler" />
+          {(outstandingQuery.data ?? []).slice(0, 5).length > 0 ? (
+            (outstandingQuery.data ?? []).slice(0, 5).map((item) => (
+              <Pressable
+                key={item.rental_id}
+                onPress={() => router.push(`/(app)/rentals/${item.rental_id}`)}
+              >
+                <Card style={styles.listCard}>
+                  <Text style={styles.cardTitle}>
+                    {item.plate} · {item.customer_name}
+                  </Text>
+                  <Text style={styles.cardMeta}>
+                    Kalan {formatCurrency(item.remaining_amount)}
+                  </Text>
+                </Card>
+              </Pressable>
+            ))
+          ) : (
+            <EmptyState title="Açık ödeme bulunmuyor." />
           )}
 
           <SectionHeader
@@ -127,9 +202,7 @@ export default function DashboardScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Yeni Kiralama"
-                onPress={() => {
-                  // TODO(STEP 5): navigate to rental create wizard
-                }}
+                onPress={() => router.push('/(app)/rentals/create')}
                 style={styles.linkBtn}
               >
                 <Text style={styles.linkText}>Yeni Kiralama</Text>
@@ -141,10 +214,7 @@ export default function DashboardScreen() {
               <UpcomingRentalRow key={item.rental_id} item={item} />
             ))
           ) : (
-            <EmptyState
-              title="Henüz kiralama bulunmuyor."
-              description="Yeni bir kiralama oluşturarak başlayabilirsiniz."
-            />
+            <EmptyState title="Henüz kiralama bulunmuyor." />
           )}
         </>
       ) : null}
@@ -153,39 +223,25 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    paddingHorizontal: spacing.lg,
-  },
-  header: {
-    marginBottom: spacing.xl,
-    gap: spacing.xs,
-  },
-  hello: {
-    ...typography.title,
-    color: colors.text,
-  },
-  date: {
-    ...typography.body,
-    color: colors.textSecondary,
-  },
+  screen: { flex: 1, backgroundColor: colors.background },
+  content: { paddingHorizontal: spacing.lg },
+  header: { marginBottom: spacing.xl, gap: spacing.xs },
+  hello: { ...typography.title, color: colors.text },
+  date: { ...typography.body, color: colors.textSecondary },
   kpiGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.md,
     marginBottom: spacing.lg,
   },
+  listCard: { marginBottom: spacing.sm, gap: 4 },
+  cardTitle: { ...typography.bodyMedium, color: colors.text },
+  cardMeta: { ...typography.caption, color: colors.textSecondary },
   linkBtn: {
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
     minHeight: 44,
     justifyContent: 'center',
   },
-  linkText: {
-    ...typography.label,
-    color: colors.primary,
-  },
+  linkText: { ...typography.label, color: colors.primary },
 });

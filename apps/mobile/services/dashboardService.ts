@@ -77,6 +77,83 @@ export const dashboardService = {
     return rows ?? [];
   },
 
+  async getTodayHandovers(): Promise<
+    Array<{
+      rental_id: string;
+      vehicle_id: string;
+      plate: string;
+      brand: string;
+      model: string;
+      customer_name: string;
+      start_date: string;
+      start_time: string;
+      status: RentalStatus;
+    }>
+  > {
+    const rows = await callRpc<
+      Array<{
+        rental_id: string;
+        vehicle_id: string;
+        plate: string;
+        brand: string;
+        model: string;
+        customer_name: string;
+        start_date: string;
+        start_time: string;
+        status: RentalStatus;
+      }>
+    >('get_today_handovers');
+    return rows ?? [];
+  },
+
+  async getOutstandingPayments(): Promise<
+    Array<{
+      rental_id: string;
+      plate: string;
+      customer_name: string;
+      total_amount: number;
+      paid_amount: number;
+      remaining_amount: number;
+      status: RentalStatus;
+    }>
+  > {
+    const rows = await callRpc<
+      Array<{
+        rental_id: string;
+        plate: string;
+        customer_name: string;
+        total_amount: number;
+        paid_amount: number;
+        remaining_amount: number;
+        status: RentalStatus;
+      }>
+    >('get_outstanding_payments');
+    return rows ?? [];
+  },
+
+  async getOverdueRentals(): Promise<
+    Array<{
+      rental_id: string;
+      plate: string;
+      customer_name: string;
+      end_date: string;
+      end_time: string;
+      remaining_amount: number;
+    }>
+  > {
+    const rows = await callRpc<
+      Array<{
+        rental_id: string;
+        plate: string;
+        customer_name: string;
+        end_date: string;
+        end_time: string;
+        remaining_amount: number;
+      }>
+    >('get_overdue_rentals');
+    return rows ?? [];
+  },
+
   getVehicleStatusSummary(summary: DashboardSummary) {
     return [
       { key: 'AVAILABLE' as const, label: 'Müsait', value: summary.vehicles.available },

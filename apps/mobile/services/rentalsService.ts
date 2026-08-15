@@ -444,6 +444,16 @@ export const rentalsService = {
     rentalId: string,
     localUri: string,
     type: RentalPhotoType,
+    category?:
+      | 'FRONT'
+      | 'BACK'
+      | 'LEFT'
+      | 'RIGHT'
+      | 'INTERIOR'
+      | 'ODOMETER'
+      | 'FUEL'
+      | 'DAMAGE'
+      | 'OTHER',
   ): Promise<RentalPhoto> {
     const { organizationId } = await orgId();
 
@@ -459,8 +469,11 @@ export const rentalsService = {
       throw new Error('Fotoğraf boyutu 5 MB sınırını aşıyor.');
     }
 
+    const folder =
+      type === 'PICKUP' ? 'handover' : type === 'RETURN' ? 'return' : 'other';
     const fileName = `${Date.now()}.jpg`;
-    const storagePath = `${organizationId}/${rentalId}/${fileName}`;
+    // First path segment MUST be organization_id (storage RLS)
+    const storagePath = `${organizationId}/rentals/${rentalId}/${folder}/${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('rental-images')
@@ -480,6 +493,7 @@ export const rentalsService = {
         organization_id: organizationId,
         rental_id: rentalId,
         type,
+        category: category ?? 'OTHER',
         storage_path: storagePath,
         public_url: signed?.signedUrl ?? null,
       } as never)

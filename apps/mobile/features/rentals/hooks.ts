@@ -118,8 +118,24 @@ export function useUpdateRentalNotes(id: string) {
 export function useUploadRentalPhoto(rentalId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ uri, type }: { uri: string; type: RentalPhotoType }) =>
-      rentalsService.uploadRentalPhoto(rentalId, uri, type),
+    mutationFn: ({
+      uri,
+      type,
+      category,
+    }: {
+      uri: string;
+      type: RentalPhotoType;
+      category?:
+        | 'FRONT'
+        | 'BACK'
+        | 'LEFT'
+        | 'RIGHT'
+        | 'INTERIOR'
+        | 'ODOMETER'
+        | 'FUEL'
+        | 'DAMAGE'
+        | 'OTHER';
+    }) => rentalsService.uploadRentalPhoto(rentalId, uri, type, category),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: rentalKeys.photos(rentalId) });
     },
