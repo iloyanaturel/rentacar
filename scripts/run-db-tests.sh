@@ -46,4 +46,7 @@ SQL
 echo "==> Running core tests"
 sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/tests/01_core_tests.sql"
 
+echo "==> Running vehicle tests"
+sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${DB_NAME}" -f "${ROOT}/supabase/tests/02_vehicle_tests.sql"
+
 echo "==> OK"

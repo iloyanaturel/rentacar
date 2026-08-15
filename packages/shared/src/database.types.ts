@@ -58,7 +58,7 @@ export type FuelType =
   | 'LPG'
   | 'OTHER';
 
-export type TransmissionType = 'MANUAL' | 'AUTOMATIC' | 'OTHER';
+export type TransmissionType = 'MANUAL' | 'AUTOMATIC' | 'SEMI_AUTOMATIC' | 'OTHER';
 
 export type Json =
   | string
@@ -212,6 +212,33 @@ export interface Database {
         };
         Update: Partial<
           Database['public']['Tables']['vehicle_documents']['Insert']
+        >;
+      };
+      vehicle_mileage_logs: {
+        Row: {
+          id: string;
+          organization_id: string;
+          vehicle_id: string;
+          rental_id: string | null;
+          kilometers: number;
+          note: string | null;
+          recorded_at: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          vehicle_id: string;
+          rental_id?: string | null;
+          kilometers: number;
+          note?: string | null;
+          recorded_at?: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<
+          Database['public']['Tables']['vehicle_mileage_logs']['Insert']
         >;
       };
       customers: {
@@ -683,6 +710,29 @@ export interface Database {
           status: RentalStatus;
         }[];
       };
+      get_vehicle_stats: {
+        Args: { p_vehicle_id: string };
+        Returns: Json;
+      };
+      update_vehicle_status: {
+        Args: {
+          p_vehicle_id: string;
+          p_status: VehicleStatus;
+        };
+        Returns: Database['public']['Tables']['vehicles']['Row'];
+      };
+      update_vehicle_mileage: {
+        Args: {
+          p_vehicle_id: string;
+          p_kilometers: number;
+          p_note?: string;
+        };
+        Returns: Database['public']['Tables']['vehicles']['Row'];
+      };
+      archive_vehicle: {
+        Args: { p_vehicle_id: string };
+        Returns: Database['public']['Tables']['vehicles']['Row'];
+      };
     };
     Enums: {
       user_role: UserRole;
@@ -704,8 +754,11 @@ export type Tables<T extends keyof Database['public']['Tables']> =
 export type Organization = Tables<'organizations'>;
 export type Profile = Tables<'profiles'>;
 export type Vehicle = Tables<'vehicles'>;
+export type VehicleInsert = Database['public']['Tables']['vehicles']['Insert'];
+export type VehicleUpdate = Database['public']['Tables']['vehicles']['Update'];
 export type VehiclePhoto = Tables<'vehicle_photos'>;
 export type VehicleDocument = Tables<'vehicle_documents'>;
+export type VehicleMileageLog = Tables<'vehicle_mileage_logs'>;
 export type Customer = Tables<'customers'>;
 export type Rental = Tables<'rentals'>;
 export type RentalPhoto = Tables<'rental_photos'>;

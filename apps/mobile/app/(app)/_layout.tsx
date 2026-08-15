@@ -51,6 +51,7 @@ export default function AppLayout() {
         name="vehicles"
         options={{
           title: 'Araçlar',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="car-outline" color={color} size={size} />
           ),

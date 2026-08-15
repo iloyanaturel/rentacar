@@ -29,6 +29,7 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      "expo-image-picker",
       [
         "expo-splash-screen",
         {
@@ -36,7 +37,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#F4F6F8"
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ],
     "experiments": {
       "typedRoutes": true

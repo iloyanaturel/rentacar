@@ -51,25 +51,23 @@ Her adımda: kod → TypeScript → lint/build → schema-model uyumu → UX.
 
 ---
 
-## STEP 4 — Dashboard (taşındı / birleşti)
+## STEP 4 — Araç modülü ✅
 
-Dashboard STEP 3 ile tamamlandı. Sonraki adım araç modülü.
+**Durum:** Tamamlandı
 
----
+**Çıktılar:**
+- Araç listesi (arama debounce, filtre, infinite scroll, pull-to-refresh)
+- Yeni araç / düzenleme formları (RHF + Zod)
+- Araç detay (galeri, sekmeler, finans/doluluk, durum, KM, soft delete)
+- Fotoğraf upload (sıkıştırma + signed URL) / primary / sil
+- `vehicle_mileage_logs` + vehicle RPCs migration
+- `vehiclesService` + React Query hooks
 
-## STEP 5 — Araç modülü
-
-**Hedef:**
-- Liste: arama (plaka/marka/model), durum filtresi, kart UI
-- Oluştur / düzenle formu (Zod TR mesajları), plaka unique
-- Detay: genel + finansal özet + geçmiş kiralamalar + bakım + masraf sekmeleri
-- Fotoğraf upload (Storage) — bucket hazır değilse açıkça disabled + not
-
-**Doğrulama:** CRUD + soft delete; RLS izolasyonu (mümkünse manuel).
+**Doğrulama:** `npm run test:step3` ✅ · `npm run db:test` ✅ (STEP4 vehicle tests dahil)
 
 ---
 
-## STEP 6 — Müşteri modülü
+## STEP 5 — Müşteri modülü
 
 **Hedef:**
 - Liste + arama (ad/soyad/telefon)
