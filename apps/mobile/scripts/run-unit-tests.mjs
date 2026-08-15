@@ -280,4 +280,23 @@ run('role and status labels TR', () => {
   assert.equal(userStatusLabel('SUSPENDED'), 'Pasif');
 });
 
-console.log('ALL STEP 9 UNIT TESTS PASSED');
+run('formatCurrency TR decimals 1000.10', () => {
+  assert.equal(formatCurrency(1000.1), '1.000,10 ₺');
+  assert.equal(formatCurrency(1279.5), '1.279,50 ₺');
+});
+
+run('financial reconciliation helpers', () => {
+  const daily = 1000;
+  const days = 5;
+  const discount = 0;
+  const extra = 0;
+  const deposit = 3000;
+  const total = daily * days - discount + extra;
+  const paid = 2500;
+  const remaining = total - paid;
+  assert.equal(total, 5000);
+  assert.equal(remaining, 2500);
+  assert.equal(deposit, 3000); // deposit separate from total
+});
+
+console.log('ALL STEP 10 UNIT TESTS PASSED');

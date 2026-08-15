@@ -1,9 +1,9 @@
+import { isDebugLoggingEnabled } from '@/config/env';
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-const isProd = !__DEV__;
-
 function emit(level: LogLevel, message: string, meta?: unknown) {
-  if (isProd && level === 'debug') return;
+  if (level === 'debug' && !isDebugLoggingEnabled()) return;
   const payload = meta === undefined ? message : [message, sanitize(meta)];
   // eslint-disable-next-line no-console
   console[level === 'debug' ? 'log' : level](`[RentaFlow:${level}]`, payload);

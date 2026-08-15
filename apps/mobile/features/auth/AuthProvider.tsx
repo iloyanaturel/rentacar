@@ -15,6 +15,7 @@ import { getErrorMessage } from '@/utils/errors';
 import { queryClient } from '@/lib/queryClient';
 import { settingsService } from '@/services/settingsService';
 import { logger } from '@/utils/logger';
+import { track } from '@/lib/analytics';
 
 type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -105,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           touchedSignIn.current = nextSession.user.id;
           void settingsService.touchLastSignIn();
           void settingsService.recordAuthEvent('LOGIN');
+          track('LOGIN');
         }
       } catch (error) {
         logger.warn('auth.profile_load_failed', {
@@ -175,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     try {
       await settingsService.recordAuthEvent('LOGOUT');
+      track('LOGOUT');
     } catch {
       // best-effort audit
     }

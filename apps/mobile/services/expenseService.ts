@@ -50,13 +50,20 @@ export const expenseService = {
     from?: string;
     to?: string;
     search?: string;
+    page?: number;
+    pageSize?: number;
   }): Promise<ExpenseItem[]> {
+    const page = params?.page ?? 0;
+    const pageSize = params?.pageSize ?? 50;
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+
     let query = supabase
       .from('expenses')
       .select('*, vehicles(plate, brand)')
       .is('deleted_at', null)
       .order('expense_date', { ascending: false })
-      .limit(100);
+      .range(from, to);
 
     if (params?.vehicleId) query = query.eq('vehicle_id', params.vehicleId);
     if (params?.category) query = query.eq('category', params.category);

@@ -19,6 +19,7 @@ import { AppProviders } from '@/lib/providers';
 import { AppErrorBoundary } from '@/components/AppErrorBoundary';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { initErrorTracking } from '@/lib/errorTracking';
+import { track } from '@/lib/analytics';
 import { colors, typography } from '@/theme';
 
 export { AppErrorBoundary as ErrorBoundary } from '@/components/AppErrorBoundary';
@@ -43,6 +44,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       void SplashScreen.hideAsync();
+      track('APP_OPENED');
     }
   }, [loaded]);
 

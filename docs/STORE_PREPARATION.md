@@ -14,10 +14,27 @@ Do **not** submit until legal + privacy URLs are live and QA checklist is green.
 | Terms URL | `https://rentaflow.app/terms` (placeholder) |
 | Support / help URL | `https://rentaflow.app/help` (placeholder) |
 
-## Description (placeholder)
-Short: Araç kiralama işletmeleri için filo, kiralama, ödeme ve raporlama.
+## Description (Google Play — TR placeholder)
 
-Full: RentaFlow, rent-a-car firmalarının araç, müşteri, kiralama, teslim/iade, ödeme, bakım, masraf ve rapor süreçlerini tek uygulamada yönetmesini sağlar. Organizasyon bazlı yetkilendirme ve finansal kayıt koruması içerir.
+RentaFlow, rent-a-car işletmelerinin günlük operasyonlarını tek uygulamada yönetmesini sağlar.
+
+Ana özellikler:
+• Araç yönetimi
+• Müşteri yönetimi
+• Kiralama
+• Teslim / iade
+• Ödeme
+• Depozito
+• Hasar
+• Bakım
+• Masraf
+• Raporlama
+• Bildirimler
+
+## Description (App Store subtitle)
+
+Araç Kiralama Yönetim Sistemi
+
 
 ## Screenshots
 Prepare placeholders for:
