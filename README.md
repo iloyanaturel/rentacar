@@ -4,12 +4,11 @@ Profesyonel, mobil öncelikli **araç kiralama yönetim sistemi** (işletme oper
 
 ## Durum
 
-**STEP 1 tamamlandı:** proje analizi ve mimari planlama.
+**STEP 2 tamamlandı:** Supabase/Postgres şema, RLS, RPC’ler, storage bucket’ları, seed ve DB testleri.
 
-Uygulama kodu henüz yazılmadı. Plan belgeleri:
-
-- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — monorepo, stack, şema, RLS, servis katmanı
-- [docs/DEVELOPMENT_PLAN.md](./docs/DEVELOPMENT_PLAN.md) — STEP 2–10 uygulama sırası
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — monorepo ve mimari
+- [docs/DEVELOPMENT_PLAN.md](./docs/DEVELOPMENT_PLAN.md) — STEP sırası
+- [docs/DATABASE.md](./docs/DATABASE.md) — migration / seed / test kullanımı
 
 ## Hedef stack (özet)
 
@@ -18,16 +17,23 @@ Uygulama kodu henüz yazılmadı. Plan belgeleri:
 | Mobil | Expo, Expo Router, TypeScript, NativeWind, TanStack Query, RHF + Zod |
 | Backend | Supabase (Postgres, Auth, Storage, RLS) |
 | Web | Next.js + Tailwind (MVP sonrası) |
-| Ortak | date-fns, decimal para formatı (`₺`) |
+| Ortak | `@rentaflow/shared` tipleri, date-fns, `₺` formatı |
 
 ## MVP kapsamı
 
 Auth → Dashboard → Araçlar → Müşteriler → Kiralamalar → Ödemeler → Teslim/iade → Temel raporlar
 
+## Database komutları
+
+```bash
+npm run db:test          # lokal Postgres üzerinde migration + STEP 2 testleri
+npx supabase db reset    # Docker ile local Supabase (migrations + seed)
+```
+
 ## Sonraki adım
 
-**STEP 2:** Supabase migration’lar, enums, RLS, multi-tenant şema, development seed.
+**STEP 3:** Expo mobil iskelet + Authentication (login / session / guard).
 
-## Geliştirme
+## Ortam değişkenleri
 
-Henüz `apps/` veya `supabase/` klasörleri oluşturulmadı; STEP 2–3 ile kurulacak.
+`.env.example` dosyasını kopyalayın. Service role key client’a konmaz.

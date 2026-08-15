@@ -1,0 +1,17 @@
+{
+  "name": "rentaflow",
+  "private": true,
+  "version": "0.1.0",
+  "description": "RentaFlow — araç kiralama yönetim sistemi monorepo",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "db:test": "bash scripts/run-db-tests.sh",
+    "typecheck:shared": "npm run typecheck -w @rentaflow/shared"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

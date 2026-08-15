@@ -19,24 +19,18 @@ Her adımda: kod → TypeScript → lint/build → schema-model uyumu → UX.
 
 ---
 
-## STEP 2 — Database schema
+## STEP 2 — Database schema ✅
 
-**Hedef:**
-- `supabase/migrations/` altında:
-  - Enums
-  - `organizations`, `profiles`, `organization_settings`
-  - `vehicles`, `vehicle_photos`
-  - `customers`
-  - `rentals` (+ overlap koruması)
-  - `payments`, `expenses`, `maintenance_records`
-  - `notifications`, `audit_logs`
-  - Soft delete kolonları
-  - RLS politikaları (`organization_id`)
-  - Storage bucket tanımları (SQL veya dokümante edilmiş setup)
-- Dev-only seed: 10 araç, 10 müşteri, 15 kiralama, 10 ödeme, 5 masraf, 5 bakım
-- Production’da seed otomatik çalışmaz
+**Durum:** Tamamlandı
 
-**Doğrulama:** SQL syntax review; enum ↔ frontend type listesi hizası.
+**Çıktılar:**
+- `supabase/migrations/` — enums, tablolar, indexler, functions/triggers, RLS, storage, reporting views
+- `supabase/seed.sql` — development-only demo data
+- `packages/shared` — Database TypeScript types
+- `scripts/run-db-tests.sh` + `supabase/tests/` — 10 senaryo + depozito kontrolü
+- `.env.example`, `docs/DATABASE.md`
+
+**Doğrulama:** `npm run typecheck:shared` ✅ · `npm run db:test` ✅ (Test 1–10 PASS)
 
 ---
 
