@@ -8,24 +8,36 @@ import type { Database } from '@rentaflow/shared';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
+/** Avoid AsyncStorage/window during Expo Router SSR (Node has no `window`). */
+const canUseWebStorage = Platform.OS === 'web' && typeof window !== 'undefined';
+
 const ExpoStorageAdapter = {
   getItem: (key: string) => {
-    if (Platform.OS === 'web') {
-      return AsyncStorage.getItem(key);
+    if (Platform.OS !== 'web') {
+      return SecureStore.getItemAsync(key);
     }
-    return SecureStore.getItemAsync(key);
+    if (!canUseWebStorage) {
+      return Promise.resolve(null);
+    }
+    return AsyncStorage.getItem(key);
   },
   setItem: (key: string, value: string) => {
-    if (Platform.OS === 'web') {
-      return AsyncStorage.setItem(key, value);
+    if (Platform.OS !== 'web') {
+      return SecureStore.setItemAsync(key, value);
     }
-    return SecureStore.setItemAsync(key, value);
+    if (!canUseWebStorage) {
+      return Promise.resolve();
+    }
+    return AsyncStorage.setItem(key, value);
   },
   removeItem: (key: string) => {
-    if (Platform.OS === 'web') {
-      return AsyncStorage.removeItem(key);
+    if (Platform.OS !== 'web') {
+      return SecureStore.deleteItemAsync(key);
     }
-    return SecureStore.deleteItemAsync(key);
+    if (!canUseWebStorage) {
+      return Promise.resolve();
+    }
+    return AsyncStorage.removeItem(key);
   },
 };
 
