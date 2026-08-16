@@ -1,0 +1,87 @@
+{
+  "expo": {
+    "name": "RentaFlow",
+    "slug": "rentaflow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "rentaflow",
+    "userInterfaceStyle": "automatic",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/REPLACE_WITH_EAS_PROJECT_ID",
+      "fallbackToCacheTimeout": 0
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rentaflow.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Araç ve hasar fotoğrafları çekmek için kamera erişimi gerekir.",
+        "NSPhotoLibraryUsageDescription": "Araç, teslim, iade ve fiş görsellerini seçmek için galeri erişimi gerekir.",
+        "NSPhotoLibraryAddUsageDescription": "Kaydedilen görselleri galeriye eklemek için izin gerekir."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F4F6F8",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "package": "com.rentaflow.app",
+      "versionCode": 1,
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "POST_NOTIFICATIONS",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Araç, teslim, iade ve fiş görsellerini seçmek için galeri erişimi gerekir.",
+          "cameraPermission": "Araç ve hasar fotoğrafları çekmek için kamera erişimi gerekir."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#0F766E"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#F4F6F8"
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-sharing"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
