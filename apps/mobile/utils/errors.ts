@@ -35,8 +35,12 @@ export function getErrorMessage(error: unknown, fallback?: string): string {
         return 'E-posta adresiniz henüz doğrulanmamış.';
       }
 
-      if (msg.includes('network') || msg.includes('fetch')) {
-        return 'İnternet bağlantısı kurulamadı. Lütfen tekrar deneyin.';
+      if (
+        msg.includes('network') ||
+        msg.includes('fetch') ||
+        msg.includes('failed to fetch')
+      ) {
+        return 'Sunucuya ulaşılamadı. .env içindeki Supabase URL/anon key değerlerini ve interneti kontrol edin, sonra Expo’yu -c ile yeniden başlatın.';
       }
 
       if (msg.includes('organization') || msg.includes('organizasyon')) {

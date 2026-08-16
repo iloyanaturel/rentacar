@@ -41,10 +41,14 @@ const ExpoStorageAdapter = {
   },
 };
 
+const looksLikePlaceholder =
+  /YOUR_|your_dev|placeholder|example\.com/i.test(supabaseUrl) ||
+  /YOUR_|your_dev|placeholder|anon_key/i.test(supabaseAnonKey) ||
+  !/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(supabaseUrl) ||
+  supabaseAnonKey.length < 20;
+
 export const isSupabaseConfigured =
-  Boolean(supabaseUrl) &&
-  Boolean(supabaseAnonKey) &&
-  !supabaseUrl.includes('YOUR_PROJECT');
+  Boolean(supabaseUrl) && Boolean(supabaseAnonKey) && !looksLikePlaceholder;
 
 export const supabase = createClient<Database>(
   supabaseUrl || 'https://placeholder.supabase.co',

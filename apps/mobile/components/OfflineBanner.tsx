@@ -3,8 +3,8 @@ import { AppState, StyleSheet, Text, View } from 'react-native';
 import { colors, spacing, typography } from '@/theme';
 
 /**
- * Lightweight offline UX — polls reachability without a native NetInfo dep.
- * Full offline mode is out of scope for STEP 9.
+ * Lightweight offline UX — probes the configured Supabase host (not Google),
+ * so regional blocks / captive portals don't false-trigger the banner.
  */
 export function OfflineBanner() {
   const [offline, setOffline] = useState(false);
@@ -13,10 +13,20 @@ export function OfflineBanner() {
     let cancelled = false;
 
     const check = async () => {
+      const base = (process.env.EXPO_PUBLIC_SUPABASE_URL ?? '').replace(
+        /\/$/,
+        '',
+      );
+      if (!base || /YOUR_|placeholder/i.test(base)) {
+        if (!cancelled) setOffline(false);
+        return;
+      }
+
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 4000);
-        await fetch('https://clients3.google.com/generate_204', {
+        const timer = setTimeout(() => controller.abort(), 5000);
+        // Any HTTP response (including 401/404) means the device has network.
+        await fetch(`${base}/auth/v1/health`, {
           method: 'GET',
           signal: controller.signal,
         });
