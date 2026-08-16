@@ -24,6 +24,8 @@ import {
   type VehicleFormValues,
 } from '@/features/vehicles/schemas';
 import { FUEL_OPTIONS, TRANSMISSION_OPTIONS } from '@/features/vehicles/constants';
+import { BrandModelPickers } from '@/features/vehicles/BrandModelPickers';
+import { carCatalogMeta } from '@/data/carCatalog';
 import { getErrorMessage } from '@/utils/errors';
 import type { FuelType, TransmissionType } from '@rentaflow/shared';
 
@@ -35,6 +37,7 @@ export default function NewVehiclePage() {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<VehicleFormValues>({
     resolver: zodResolver(vehicleFormSchema),
@@ -140,19 +143,11 @@ export default function NewVehiclePage() {
                 />
               )}
             />
-            <Controller
+            <BrandModelPickers
               control={control}
-              name="brand"
-              render={({ field }) => (
-                <Input {...field} label="Marka" placeholder="Renault" error={errors.brand?.message} />
-              )}
-            />
-            <Controller
-              control={control}
-              name="model"
-              render={({ field }) => (
-                <Input {...field} label="Model" placeholder="Clio" error={errors.model?.message} />
-              )}
+              brandError={errors.brand?.message}
+              modelError={errors.model?.message}
+              onBrandChange={() => setValue('model', '')}
             />
             <Controller
               control={control}
@@ -279,13 +274,17 @@ export default function NewVehiclePage() {
             )}
           />
 
-          <div className="flex justify-end gap-2">
-            <Link href="/vehicles">
-              <Button type="button" variant="secondary">
+          <p className="text-xs text-rf-faint">
+            Marka/model listesi: {carCatalogMeta.source} ({carCatalogMeta.brandCount} marka).
+          </p>
+
+          <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 -mx-1 flex flex-col-reverse gap-2 border-t border-rf-border bg-white/95 p-3 backdrop-blur sm:static sm:mx-0 sm:flex-row sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 lg:bottom-0">
+            <Link href="/vehicles" className="sm:w-auto">
+              <Button type="button" variant="secondary" className="w-full sm:w-auto">
                 Vazgeç
               </Button>
             </Link>
-            <Button type="submit" loading={isSubmitting}>
+            <Button type="submit" loading={isSubmitting} className="w-full sm:w-auto">
               Aracı Kaydet
             </Button>
           </div>

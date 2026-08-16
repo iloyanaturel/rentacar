@@ -9,3 +9,4 @@ export {
   ErrorBanner,
   StatCard,
 } from './Card';
+export { Combobox } from './Combobox';

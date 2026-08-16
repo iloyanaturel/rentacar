@@ -17,7 +17,7 @@ export function Input({
       ) : null}
       <input
         className={cn(
-          'w-full rounded-xl border border-rf-border bg-white px-3.5 py-2.5 text-sm text-rf-text outline-none transition placeholder:text-rf-faint focus:border-rf-primary focus:ring-2 focus:ring-rf-primary/20',
+          'w-full min-h-11 rounded-xl border border-rf-border bg-white px-3.5 py-2.5 text-sm text-rf-text outline-none transition placeholder:text-rf-faint focus:border-rf-primary focus:ring-2 focus:ring-rf-primary/20',
           error && 'border-rf-danger focus:border-rf-danger focus:ring-rf-danger/20',
           className,
         )}
@@ -73,7 +73,7 @@ export function Select({
       ) : null}
       <select
         className={cn(
-          'w-full rounded-xl border border-rf-border bg-white px-3.5 py-2.5 text-sm text-rf-text outline-none transition focus:border-rf-primary focus:ring-2 focus:ring-rf-primary/20',
+          'w-full min-h-11 rounded-xl border border-rf-border bg-white px-3.5 py-2.5 text-sm text-rf-text outline-none transition focus:border-rf-primary focus:ring-2 focus:ring-rf-primary/20',
           error && 'border-rf-danger',
           className,
         )}

@@ -30,6 +30,7 @@ import {
   MANUAL_STATUS_OPTIONS,
   TRANSMISSION_OPTIONS,
 } from '@/features/vehicles/constants';
+import { BrandModelPickers } from '@/features/vehicles/BrandModelPickers';
 import { getErrorMessage } from '@/utils/errors';
 import type { FuelType, TransmissionType } from '@rentaflow/shared';
 
@@ -49,6 +50,7 @@ export default function EditVehiclePage() {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<VehicleEditFormValues>({
     resolver: zodResolver(vehicleEditSchema),
@@ -186,19 +188,11 @@ export default function EditVehiclePage() {
                 />
               )}
             />
-            <Controller
+            <BrandModelPickers
               control={control}
-              name="brand"
-              render={({ field }) => (
-                <Input {...field} label="Marka" error={errors.brand?.message} />
-              )}
-            />
-            <Controller
-              control={control}
-              name="model"
-              render={({ field }) => (
-                <Input {...field} label="Model" error={errors.model?.message} />
-              )}
+              brandError={errors.brand?.message}
+              modelError={errors.model?.message}
+              onBrandChange={() => setValue('model', '')}
             />
             <Controller
               control={control}
@@ -320,13 +314,13 @@ export default function EditVehiclePage() {
             render={({ field }) => <TextArea {...field} label="Notlar" rows={3} />}
           />
 
-          <div className="flex justify-end gap-2">
-            <Link href={`/vehicles/${id}`}>
-              <Button type="button" variant="secondary">
+          <div className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-10 -mx-1 flex flex-col-reverse gap-2 border-t border-rf-border bg-white/95 p-3 backdrop-blur sm:static sm:mx-0 sm:flex-row sm:justify-end sm:border-0 sm:bg-transparent sm:p-0 lg:bottom-0">
+            <Link href={`/vehicles/${id}`} className="sm:w-auto">
+              <Button type="button" variant="secondary" className="w-full sm:w-auto">
                 Vazgeç
               </Button>
             </Link>
-            <Button type="submit" loading={isSubmitting}>
+            <Button type="submit" loading={isSubmitting} className="w-full sm:w-auto">
               Değişiklikleri Kaydet
             </Button>
           </div>
