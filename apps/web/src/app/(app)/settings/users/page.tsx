@@ -191,7 +191,6 @@ export default function UsersSettingsPage() {
         <InviteUserModal
           onClose={() => setInviteOpen(false)}
           onInvited={async () => {
-            setInviteOpen(false);
             await refresh();
           }}
         />
@@ -211,19 +210,34 @@ function InviteUserModal({
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState<UserRole>('staff');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
     if (!email.trim() || !fullName.trim()) {
       setError('Ad ve e-posta zorunludur.');
       return;
     }
     setSubmitting(true);
     try {
-      await settingsService.inviteUser({ email: email.trim(), fullName: fullName.trim(), role });
-      onInvited();
+      const result = await settingsService.inviteUser({
+        email: email.trim(),
+        fullName: fullName.trim(),
+        role,
+      });
+      if (result.temporaryPassword) {
+        setSuccess(
+          `${result.note ?? 'Kullanıcı oluşturuldu.'}\nE-posta: ${result.email}\nGeçici şifre: ${result.temporaryPassword}`,
+        );
+      } else {
+        setSuccess(
+          `${result.email} adresine davet gönderildi. Kullanıcı listede görünecek.`,
+        );
+      }
+      await onInvited();
     } catch (err) {
       setError(getErrorMessage(err, 'Davet gönderilemedi.'));
     } finally {
@@ -232,8 +246,8 @@ function InviteUserModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
-      <Card className="w-full max-w-md">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-0 sm:items-center sm:p-4">
+      <Card className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-b-none sm:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-lg font-semibold">Kullanıcı Davet Et</h2>
           <button
@@ -244,31 +258,52 @@ function InviteUserModal({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error ? <ErrorBanner message={error} /> : null}
-          <Input label="Ad Soyad" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-          <Input
-            label="E-posta"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Select label="Rol" value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
-            {ROLES.filter((r) => r !== 'owner').map((r) => (
-              <option key={r} value={r}>
-                {roleLabel(r)}
-              </option>
-            ))}
-          </Select>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={onClose}>
-              Vazgeç
-            </Button>
-            <Button type="submit" loading={submitting}>
-              Davet Gönder
+        {success ? (
+          <div className="space-y-4">
+            <div className="whitespace-pre-wrap rounded-xl bg-rf-success-soft px-4 py-3 text-sm text-rf-success">
+              {success}
+            </div>
+            <Button className="w-full" onClick={onClose}>
+              Tamam
             </Button>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error ? <ErrorBanner message={error} /> : null}
+            <Input
+              label="Ad Soyad"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              autoComplete="name"
+            />
+            <Input
+              label="E-posta"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
+            <Select
+              label="Rol"
+              value={role}
+              onChange={(e) => setRole(e.target.value as UserRole)}
+            >
+              {ROLES.filter((r) => r !== 'owner').map((r) => (
+                <option key={r} value={r}>
+                  {roleLabel(r)}
+                </option>
+              ))}
+            </Select>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="secondary" onClick={onClose} className="w-full sm:w-auto">
+                Vazgeç
+              </Button>
+              <Button type="submit" loading={submitting} className="w-full sm:w-auto">
+                Davet Gönder
+              </Button>
+            </div>
+          </form>
+        )}
       </Card>
     </div>
   );

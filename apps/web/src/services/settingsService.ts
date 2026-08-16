@@ -98,18 +98,49 @@ export const settingsService = {
     email: string;
     fullName: string;
     role: UserRole;
-  }) {
-    const { data, error } = await supabase.rpc(
-      'invite_organization_user' as never,
-      {
-        p_email: input.email,
-        p_full_name: input.fullName,
-        p_role: input.role,
-      } as never,
-    );
-    if (error || !data) throw mapError(error, 'Davet gönderilemedi.');
-    const row = data as { token: string; email: string; role: string };
-    return { token: row.token, email: row.email, role: row.role };
+  }): Promise<{
+    email: string;
+    role: string;
+    temporaryPassword?: string;
+    note?: string;
+  }> {
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+    if (sessionError || !sessionData.session?.access_token) {
+      throw new Error('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+    }
+
+    const { data, error } = await supabase.functions.invoke('invite-user', {
+      body: {
+        email: input.email,
+        full_name: input.fullName,
+        role: input.role,
+      },
+    });
+
+    if (error) {
+      throw mapError(error, 'Davet gönderilemedi.');
+    }
+
+    const payload = (data ?? {}) as {
+      ok?: boolean;
+      error?: string;
+      email?: string;
+      role?: string;
+      temporary_password?: string;
+      note?: string;
+    };
+
+    if (!payload.ok) {
+      throw new Error(payload.error || 'Davet gönderilemedi.');
+    }
+
+    return {
+      email: payload.email ?? input.email,
+      role: payload.role ?? input.role,
+      temporaryPassword: payload.temporary_password,
+      note: payload.note,
+    };
   },
 
   async setUserStatus(userId: string, status: 'ACTIVE' | 'SUSPENDED') {
