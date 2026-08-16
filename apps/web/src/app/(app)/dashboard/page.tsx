@@ -42,10 +42,15 @@ export default function DashboardPage() {
 
   if (summary.isLoading) return <LoadingBlock />;
   if (summary.isError || !summary.data) {
+    const detail =
+      summary.error instanceof Error ? summary.error.message : null;
     return (
       <EmptyState
         title="Özet yüklenemedi"
-        description="Bağlantıyı kontrol edip tekrar deneyin."
+        description={
+          detail ??
+          'Profil veya organizasyon kaydı eksik olabilir. Yenileyin; devam ederse yöneticinize bildirin.'
+        }
         action={
           <Button onClick={() => void summary.refetch()}>Yenile</Button>
         }

@@ -19,7 +19,9 @@ export function usePermissions() {
     staleTime: 60_000,
   });
 
-  const perms = query.data ?? permissionsForRole(role);
+  const rolePerms = permissionsForRole(role);
+  const perms =
+    query.data && query.data.length > 0 ? query.data : rolePerms;
 
   return {
     permissions: perms,
