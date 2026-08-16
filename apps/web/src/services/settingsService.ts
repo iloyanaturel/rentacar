@@ -118,10 +118,6 @@ export const settingsService = {
       },
     });
 
-    if (error) {
-      throw mapError(error, 'Davet gönderilemedi.');
-    }
-
     const payload = (data ?? {}) as {
       ok?: boolean;
       error?: string;
@@ -130,6 +126,14 @@ export const settingsService = {
       temporary_password?: string;
       note?: string;
     };
+
+    if (error) {
+      // FunctionsHttpError often hides the JSON body; prefer payload.error when present.
+      if (payload.error) {
+        throw new Error(payload.error);
+      }
+      throw mapError(error, 'Davet gönderilemedi.');
+    }
 
     if (!payload.ok) {
       throw new Error(payload.error || 'Davet gönderilemedi.');

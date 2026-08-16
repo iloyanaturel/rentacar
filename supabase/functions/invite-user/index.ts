@@ -76,7 +76,6 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Invitation audit row (RPC enforces permissions again)
   const { data: invite, error: inviteErr } = await userClient.rpc(
     'invite_organization_user',
     { p_email: email, p_full_name: fullName, p_role: role },
@@ -90,8 +89,8 @@ Deno.serve(async (req) => {
     Deno.env.get('NEXT_PUBLIC_SITE_URL') ||
     'https://rentaflow-web-three.vercel.app';
 
-  // Find or invite auth user
   let userId: string | null = null;
+  let temporaryPassword: string | null = null;
   const { data: listed } = await admin.auth.admin.listUsers({
     page: 1,
     perPage: 1000,
@@ -114,7 +113,6 @@ Deno.serve(async (req) => {
         redirectTo: `${siteUrl}/login`,
       });
     if (authErr) {
-      // Fallback: create user without email if SMTP not configured
       const tempPassword = crypto.randomUUID().replace(/-/g, '') + 'Aa1!';
       const { data: created, error: createErr } =
         await admin.auth.admin.createUser({
@@ -140,43 +138,7 @@ Deno.serve(async (req) => {
         );
       }
       userId = created.user.id;
-
-      // Continue below to create profile, then return password for admin to share
-      const { error: profileErr } = await admin.from('profiles').upsert(
-        {
-          id: userId,
-          organization_id: orgId,
-          full_name: fullName,
-          role,
-          status: 'ACTIVE',
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'id' },
-      );
-      if (profileErr) {
-        return json(
-          {
-            error: `Profil oluşturulamadı: ${profileErr.message}`,
-            user_id: userId,
-          },
-          500,
-        );
-      }
-      await admin
-        .from('organization_invitations')
-        .update({ accepted_at: new Date().toISOString() })
-        .eq('organization_id', orgId)
-        .eq('email', email);
-
-      return json({
-        ok: true,
-        user_id: userId,
-        email,
-        role,
-        temporary_password: tempPassword,
-        note: 'E-posta daveti gönderilemedi (SMTP). Geçici şifreyi kullanıcıya iletin.',
-        invitation: invite,
-      });
+      temporaryPassword = tempPassword;
     } else {
       userId = invited.user?.id ?? null;
     }
@@ -209,7 +171,6 @@ Deno.serve(async (req) => {
     );
   }
 
-  // Mark invitation accepted when profile exists
   await admin
     .from('organization_invitations')
     .update({ accepted_at: new Date().toISOString() })
@@ -221,6 +182,10 @@ Deno.serve(async (req) => {
     user_id: userId,
     email,
     role,
+    temporary_password: temporaryPassword,
+    note: temporaryPassword
+      ? 'E-posta daveti gönderilemedi (SMTP). Geçici şifreyi kullanıcıya iletin.'
+      : undefined,
     invitation: invite,
   });
 });

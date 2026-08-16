@@ -500,12 +500,12 @@ CREATE OR REPLACE FUNCTION public.invite_organization_user(
 RETURNS public.organization_invitations
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_org UUID := public.get_user_organization_id();
   v_row public.organization_invitations%ROWTYPE;
-  v_token TEXT := encode(gen_random_bytes(24), 'hex');
+  v_token TEXT := encode(extensions.gen_random_bytes(24), 'hex');
 BEGIN
   IF NOT public.can_manage_users() THEN
     RAISE EXCEPTION 'Bu işlem için yetkiniz bulunmuyor.';

@@ -47,9 +47,17 @@ export function getErrorMessage(error: unknown, fallback?: string): string {
         return 'Kullanıcı organizasyonu bulunamadı. Yöneticinizle iletişime geçin.';
       }
 
-      // Log technical detail, return safe message
-      console.warn('[RentaFlow]', maybe.code ?? maybe.name, maybe.message);
-      return defaultMessage;
+      if (
+        msg.includes('edge function') ||
+        msg.includes('non-2xx') ||
+        msg.includes('failed to send a request')
+      ) {
+        return fallback ?? 'Davet servisine ulaşılamadı. Lütfen tekrar deneyin.';
+      }
+
+      // Prefer a sanitized message over a generic fallback when the API
+      // already returned a user-facing explanation (e.g. Turkish invite errors).
+      return sanitize(maybe.message, defaultMessage);
     }
   }
 
